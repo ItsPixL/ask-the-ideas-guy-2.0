@@ -1,0 +1,1 @@
+// Please delete this script. I had to put this in so that git would let me commit the new Sprites folder.
