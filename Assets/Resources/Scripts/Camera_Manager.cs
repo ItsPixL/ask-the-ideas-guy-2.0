@@ -1,18 +1,16 @@
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 public class Camera_Manager : MonoBehaviour
 {
-    private int prevScreenWidth = Screen.width;
-    private int prevScreenHeight = Screen.height;
     private int screenWidth;
     private int screenHeight;
     private Camera gameCamera;
+    public float zoomFactor = 1f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        screenWidth = prevScreenWidth;
-        screenHeight = prevScreenHeight;
+        screenWidth = Screen.width;
+        screenHeight = Screen.height;
         gameCamera = GameObject.Find("Main Camera").GetComponent<Camera>();
         changeCameraSize();
     }
@@ -20,17 +18,17 @@ public class Camera_Manager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        screenWidth = Screen.width;
-        screenHeight = Screen.height;
-        if (screenWidth != prevScreenWidth || screenHeight != prevScreenHeight)
+        if (Screen.width != screenWidth || Screen.height != screenHeight)
         {
+            screenWidth = Screen.width;
+            screenHeight = Screen.height;
             changeCameraSize();
         }
     }
 
     private void changeCameraSize()
     {
-        float orthographicSize = screenHeight / 2f;
+        float orthographicSize = screenHeight / (zoomFactor*2f);
         float aspectRatio = (float)screenWidth / screenHeight;
         gameCamera.orthographicSize = orthographicSize;
         gameCamera.aspect = aspectRatio;
