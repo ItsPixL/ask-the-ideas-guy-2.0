@@ -61,7 +61,7 @@ namespace LevelManager
         private (float, float) screenStart;
         private (float, float) screenPercent;
         private (float, float) percentPerSlot;
-        private Dictionary<(int, int), Landform> terrainInfo = new Dictionary<(int, int), Landform>();
+        public Dictionary<(int, int), Landform> terrainInfo = new Dictionary<(int, int), Landform>();
         private GameObject cameraGameObject;
         private Camera levelCamera;
 
@@ -69,8 +69,8 @@ namespace LevelManager
         {
             this.squaresX = squaresX;
             this.squaresY = squaresY;
-            this.screenStart = (screenStart.Item1/100f, screenStart.Item2/100f);
-            this.screenPercent = (screenPercent.Item1/100f, screenPercent.Item2/100f);
+            this.screenStart = (screenStart.Item1 / 100f, screenStart.Item2 / 100f);
+            this.screenPercent = (screenPercent.Item1 / 100f, screenPercent.Item2 / 100f);
             this.cameraGameObject = cameraGameObject;
             percentPerSlot = (this.screenPercent.Item1 / squaresX, this.screenPercent.Item2 / squaresY);
             levelCamera = cameraGameObject.GetComponent<Camera>();
@@ -145,9 +145,26 @@ namespace LevelManager
             float decimalX = distX / (levelCamera.orthographicSize * 2 * levelCamera.aspect);
             float distY = worldPos.y - (levelCamera.transform.position.y - levelCamera.orthographicSize);
             float decimalY = distY / (levelCamera.orthographicSize * 2);
-            int slotCoordX = (int)math.floor((decimalX-screenStart.Item1)/percentPerSlot.Item1);
-            int slotCoordY = (int)math.floor((decimalY-screenStart.Item2)/percentPerSlot.Item2);
+            int slotCoordX = (int)math.floor((decimalX - screenStart.Item1) / percentPerSlot.Item1);
+            int slotCoordY = (int)math.floor((decimalY - screenStart.Item2) / percentPerSlot.Item2);
             return (slotCoordX, slotCoordY);
+        }
+
+        public bool hasSelectedSlot((int, int) selectedSlot)
+        {
+            if (selectedSlot.Item1 < 0 || selectedSlot.Item2 >= squaresX)
+            {
+                return false;
+            }
+            if (selectedSlot.Item2 < 0 || selectedSlot.Item2 >= squaresY)
+            {
+                return false;
+            }
+            if (!terrainInfo.TryGetValue(selectedSlot, out _))
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
