@@ -5,7 +5,7 @@ public class Camera_Manager : MonoBehaviour
     private int screenWidth;
     private int screenHeight;
     private Camera gameCamera;
-    public float zoomFactor = 1f;
+    public float zoomFactor = 100f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -28,7 +28,7 @@ public class Camera_Manager : MonoBehaviour
 
     private void changeCameraSize()
     {
-        float orthographicSize = screenHeight / (zoomFactor*2f);
+        float orthographicSize = screenHeight / (zoomFactor * 2f);
         float aspectRatio = (float)screenWidth / screenHeight;
         gameCamera.orthographicSize = orthographicSize;
         gameCamera.aspect = aspectRatio;

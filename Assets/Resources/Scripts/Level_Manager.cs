@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Sprites;
-using Unity.Burst;
 using Unity.Mathematics;
 
 namespace LevelManager

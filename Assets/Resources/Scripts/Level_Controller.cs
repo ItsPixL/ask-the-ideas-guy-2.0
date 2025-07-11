@@ -40,8 +40,8 @@ public class Level_Controller : MonoBehaviour
     public void respondToMouse()
     {
         selectedSlot = levelObject.calculateClick(Input.mousePosition);
-        isSelected = levelObject.hasSelectedSlot(selectedSlot);
-        if (isSelected)
+        bool isValid = levelObject.hasSelectedSlot(selectedSlot);
+        if (isValid)
         {
             Landform currLandform = levelObject.terrainInfo[selectedSlot];
             Landform prevLandform = null;
@@ -51,8 +51,16 @@ public class Level_Controller : MonoBehaviour
             }
             if (selectedSlot == prevSelectedSlot)
             {
-                currLandform.colourSlot(outlineColour, fillColour);
-                prevLandform.colourSlot(outlineColour, fillColour);
+                if (isSelected)
+                {
+                    currLandform.colourSlot(outlineColour, fillColour);
+                    prevLandform.colourSlot(outlineColour, fillColour);
+                }
+                else
+                {
+                    currLandform.colourSlot(clickedOutlineColor, fillColour);
+                }
+                isSelected = !isSelected;
             }
             else
             {
@@ -61,6 +69,7 @@ public class Level_Controller : MonoBehaviour
                     prevLandform.colourSlot(outlineColour, fillColour);
                 }
                 currLandform.colourSlot(clickedOutlineColor, fillColour);
+                isSelected = true;
             }
         }
         else
@@ -74,6 +83,7 @@ public class Level_Controller : MonoBehaviour
             {
                 prevLandform.colourSlot(outlineColour, fillColour);
             }
+            isSelected = false;
         }
         prevSelectedSlot = selectedSlot;
     }
@@ -83,11 +93,12 @@ public class Level_Controller : MonoBehaviour
         if (levelNum == 1)
         {
             levelObject = new Level(8, 8, (32.5f, 7.5f), (60f, 85f), GameObject.Find("Main Camera"));
-            Dictionary<string, List<(int, int)>> modifications = new Dictionary<string, List<(int, int)>>
+            // A test case to check that modifications work.
+            /* Dictionary<string, List<(int, int)>> modifications = new Dictionary<string, List<(int, int)>>
             {
                 { "none", new List<(int, int)> { (4, 7) } }
             };
-            levelObject.modifyLandforms(modifications);
+            levelObject.modifyLandforms(modifications); */
             levelObject.designLandforms(new Color(0.8f, 0.1f, 0.1f, 1f), new Color(0.35f, 0.75f, 0.87f, 0.65f));
             levelObject.scaleLandforms((2f, 3f));
         }
