@@ -9,7 +9,7 @@ namespace LevelManager
     {
         public bool isWall;
         public Sprite spriteOnTop = null;
-        private GameObject slotOutline = null;
+        public GameObject slotOutline = null;
         private SpriteRenderer outlineRenderer = null;
         private GameObject slotFill = null;
         private SpriteRenderer fillRenderer = null;
@@ -164,6 +164,41 @@ namespace LevelManager
                 return false;
             }
             return true;
+        }
+        public void PlaceSpriteInSlot((int, int) gridCoord, Sprite sprite) {
+            if (!terrainInfo.TryGetValue(gridCoord, out Landform landform)) {
+                Debug.LogWarning($"No landform found at grid coordinate {gridCoord}. Cannot place sprite.");
+                return;
+            }
+
+            // Calculating slot center and size (same logic as in scaleLandforms)
+            float screenLeft = levelCamera.transform.position.x - (levelCamera.orthographicSize * levelCamera.aspect);
+            float screenBottom = levelCamera.transform.position.y - levelCamera.orthographicSize;
+            float zoomFactor = cameraGameObject.GetComponent<Camera_Manager>().zoomFactor;
+
+            float screenPercentX = screenStart.Item1 + percentPerSlot.Item1 * (gridCoord.Item1 + 0.5f);
+            float screenPercentY = screenStart.Item2 + percentPerSlot.Item2 * (gridCoord.Item2 + 0.5f);
+
+            Vector2 slotCenter = new Vector2(
+                screenLeft + Screen.width / zoomFactor * screenPercentX,
+                screenBottom + Screen.height / zoomFactor * screenPercentY
+            );
+
+            (float, float) slotSize = (
+                Screen.width / zoomFactor * percentPerSlot.Item1,
+                Screen.height / zoomFactor * percentPerSlot.Item2
+            );
+
+            // Create and place the sprite
+            GameObject spriteObj = new GameObject(sprite.name);
+            SpriteRenderer renderer = spriteObj.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            spriteObj.transform.position = new Vector3(slotCenter.x, slotCenter.y, 0);
+            spriteObj.transform.localScale = new Vector3(slotSize.Item1, slotSize.Item2, 1);
+
+            // making sure that the sprite moves/scales with the slot if it the slot is resized (mainly used for the preview where the monster spawners are visible)
+            spriteObj.transform.parent = landform.slotOutline.transform;
+            spriteObj.transform.localPosition = Vector3.zero;
         }
     }
 }
