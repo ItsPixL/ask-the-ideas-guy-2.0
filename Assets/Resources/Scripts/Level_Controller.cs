@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using LevelManager;
 using UnityEngine;
+using Sprites;
 
 public class Level_Controller : MonoBehaviour
 {
@@ -100,7 +101,11 @@ public class Level_Controller : MonoBehaviour
             };
             levelObject.modifyLandforms(modifications); */
             levelObject.designLandforms(new Color(0.8f, 0.1f, 0.1f, 1f), new Color(0.35f, 0.75f, 0.87f, 0.65f));
+            levelObject.PlaceSpriteInSlot((3, 5), SpriteLibrary.squareSprite); // must place the sprite after the landforms are designed
+            levelObject.PlaceSpriteInSlot((3, 6), SpriteLibrary.circleSprite);
+            levelObject.PlaceSpriteInSlot((4, 5), SpriteLibrary.triangleSprite);
             levelObject.scaleLandforms((2f, 3f));
+
         }
     }
 }
