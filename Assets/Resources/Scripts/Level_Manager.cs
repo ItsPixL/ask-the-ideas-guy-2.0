@@ -195,8 +195,10 @@ namespace LevelManager
             renderer.sprite = sprite;
             renderer.sortingOrder = 3; // making sure that the sprite is on top of the grids
             
-            float scaleFactor = 0.6f; // scaling the sprite down so it looks better in the grid
-            spriteObj.transform.localScale = new Vector3(slotSize.Item1 * scaleFactor, slotSize.Item2 * scaleFactor, 1);
+            // scaling the sprite down so it looks better in the grid
+            float scaleX = 0.5f;
+            float scaleY = 0.8f;
+            spriteObj.transform.localScale = new Vector3(slotSize.Item1 * scaleX, slotSize.Item2 * scaleY, 1);
 
             // making sure that the sprite moves/scales with the slot if it the slot is resized (mainly used for the preview where the monster spawners are visible)
             spriteObj.transform.parent = landform.slotOutline.transform;
