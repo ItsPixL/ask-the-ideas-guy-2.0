@@ -11,6 +11,11 @@ public class Character_Controller : MonoBehaviour {
     public (int, int) startingPosition = (0, 0);
     private Color movableOutlineColour = new Color(0.5f, 0.1f, 0.1f, 1f); // the colours of the outline when the character can move
     private Color movableFillColour = new Color(0.0f, 0.75f, 0.87f, 0.65f); // the colours of the square when the character can move
+    public Color outlineColour = new Color(0.8f, 0.1f, 0.1f, 1f);
+    public Color clickedOutlineColor = new Color(0.94f, 0.86f, 0.2f, 1f);
+    public Color fillColour = new Color(0.35f, 0.75f, 0.87f, 0.65f);
+    private GameObject characterSpriteObj = null;
+    public List<(int, int)> highlightedSlots = new List<(int, int)>();
     public (int, int) getStartingPosition() {
         // need to code this later
         startingPosition = (0, 0);
@@ -18,10 +23,17 @@ public class Character_Controller : MonoBehaviour {
         Debug.Log($"Starting position set to: {startingPosition.Item1}, {startingPosition.Item2}");
         return startingPosition;
     }
-    public void moveCharacter((int, int) newPosition) {
-        // need to code this later
-        Debug.Log($"Moving character to position: {newPosition.Item1}, {newPosition.Item2}");
+    public void moveCharacter((int, int) newPosition, float scaleX = 0.05f, float scaleY = 0.05f) {
+        // Destroy the old sprite if it exists
+        if (characterSpriteObj != null) {
+            GameObject.Destroy(characterSpriteObj);
+        }
+        // moving the character visually
+        characterSpriteObj = levelObject.PlaceSpriteInSlot(newPosition, SpriteLibrary.mainCharacterSprite, scaleX, scaleY);
         currentPosition = newPosition;
+        landform = levelObject.terrainInfo[newPosition];
+        // clear highlights after moving
+        ClearHighlights();
     }
     
     // public bool isCharacterInSlot((int, int) slotCoord) {
@@ -45,20 +57,31 @@ public class Character_Controller : MonoBehaviour {
     //     int maxTravelDistance = 3; // Example value, or pass as parameter
     //     HighlightReachableGrids(maxTravelDistance);
     // }
+    
+    public void ClearHighlights() {
+        foreach (var slot in highlightedSlots) {
+            if (levelObject.hasSelectedSlot(slot)) {
+                Landform lf = levelObject.terrainInfo[slot];
+                lf.colourSlot(outlineColour, fillColour);
+            }
+        }
+        highlightedSlots.Clear();
+    }
 
     public void HighlightReachableGrids(int maxTravelDistance) {
-        List<(int, int)> reachable = new List<(int, int)>();
+        ClearHighlights();
+        highlightedSlots.Clear();
         for (int dx = -maxTravelDistance; dx <= maxTravelDistance; dx++) {
             for (int dy = -maxTravelDistance; dy <= maxTravelDistance; dy++) {
                 int nx = currentPosition.Item1 + dx;
                 int ny = currentPosition.Item2 + dy;
-                if ((nx, ny) == currentPosition) continue; // skipping the current position that the player is in
+                if ((nx, ny) == currentPosition) continue; // skip current position
                 if (Mathf.Abs(dx) + Mathf.Abs(dy) <= maxTravelDistance) { // Manhattan distance
                     if (levelObject.hasSelectedSlot((nx, ny))) {
-                        reachable.Add((nx, ny));
-                        Debug.Log($"Reachable slot: ({nx}, {ny})");
-                        // Highlighting the slot
                         Landform lf = levelObject.terrainInfo[(nx, ny)];
+                        if (lf.isWall) continue; // skip walls
+                        highlightedSlots.Add((nx, ny));
+                        Debug.Log($"Reachable slot: ({nx}, {ny})");
                         lf.colourSlot(movableOutlineColour, movableFillColour);
                     }
                 }

@@ -112,10 +112,8 @@ namespace LevelManager
             }
         }
 
-        public void designLandforms(Color outlineColour, Color fillColour)
-        {
-            foreach (var item in terrainInfo)
-            {
+        public void designLandforms(Color outlineColour, Color fillColour) {
+            foreach (var item in terrainInfo) {
                 Landform currLandform = item.Value;
                 currLandform.designSlot(SpriteLibrary.squareSprite);
                 currLandform.colourSlot(outlineColour, fillColour);
@@ -169,10 +167,10 @@ namespace LevelManager
             return true;
         }
 
-        public void PlaceSpriteInSlot((int, int) gridCoord, Sprite sprite, float scaleX = 0.5f, float scaleY = 0.8f) {
+        public GameObject PlaceSpriteInSlot((int, int) gridCoord, Sprite sprite, float scaleX = 0.5f, float scaleY = 0.8f) {
             if (!terrainInfo.TryGetValue(gridCoord, out Landform landform)) {
                 Debug.LogWarning($"No landform found at grid coordinate {gridCoord}. Cannot place sprite.");
-                return;
+                return null;
             }
 
             // Calculating slot center and size (same logic as in scaleLandforms)
@@ -205,6 +203,8 @@ namespace LevelManager
             // making sure that the sprite moves/scales with the slot if it the slot is resized (mainly used for the preview where the monster spawners are visible)
             spriteObj.transform.parent = landform.slotOutline.transform;
             spriteObj.transform.localPosition = Vector3.zero;
+            
+            return spriteObj;
         }
     }
 }
