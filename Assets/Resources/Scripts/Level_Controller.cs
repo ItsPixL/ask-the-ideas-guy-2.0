@@ -8,13 +8,18 @@ public class Level_Controller : MonoBehaviour
     private int screenWidth;
     private int screenHeight;
     public int levelNum = 0;
+    private int playerTurns;
+    private int monsterTurns;
+    private bool isPlayerTurn;
+    private int turnsRemaining;
     private Level levelObject;
     private bool isSelected = false;
-    private (int, int) prevSelectedSlot = (-1, -1);
-    private (int, int) selectedSlot = (-1, -1);
-    private Color outlineColour = new Color(0.8f, 0.1f, 0.1f, 1f);
-    private Color clickedOutlineColor = new Color(0.94f, 0.86f, 0.2f, 1f);
+    private (int, int) prevSelectedSlot = (int.MinValue, int.MinValue);
+    private Color defaultOutline = new Color(0.8f, 0.1f, 0.1f, 1f);
+    private Color clickedOutline = new Color(0.94f, 0.86f, 0.2f, 1f); // Outline for the square that has been clicked on.
+    private Color otherOutline; // Use this for other outlines (e.g. available movement spaces). 
     private Color fillColour = new Color(0.35f, 0.75f, 0.87f, 0.65f);
+    private Dictionary<(int, int), Color> prevLandformsOutlined = new Dictionary<(int, int), Color>();
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -40,53 +45,45 @@ public class Level_Controller : MonoBehaviour
 
     public void respondToMouse()
     {
-        selectedSlot = levelObject.calculateClick(Input.mousePosition);
+        (int, int) selectedSlot = levelObject.calculateClick(Input.mousePosition);
+        Dictionary<(int, int), Color> currLandformsOutlined = new Dictionary<(int, int), Color>();
         bool isValid = levelObject.isInField(selectedSlot);
+        foreach (var item in prevLandformsOutlined)
+        {
+            changeLandformColour(item.Key, defaultOutline, fillColour);
+        }
+        prevLandformsOutlined = new Dictionary<(int, int), Color>();
         if (isValid)
         {
-            Landform currLandform = levelObject.terrainInfo[selectedSlot];
-            Landform prevLandform = null;
-            if (levelObject.terrainInfo.TryGetValue(prevSelectedSlot, out Landform output))
+            if (selectedSlot == prevSelectedSlot && isSelected)
             {
-                prevLandform = output;
-            }
-            if (selectedSlot == prevSelectedSlot)
-            {
-                if (isSelected)
-                {
-                    currLandform.colourSlot(outlineColour, fillColour);
-                    prevLandform.colourSlot(outlineColour, fillColour);
-                }
-                else
-                {
-                    currLandform.colourSlot(clickedOutlineColor, fillColour);
-                }
-                isSelected = !isSelected;
+                isSelected = false;
             }
             else
             {
-                if (prevLandform != null)
+                currLandformsOutlined = new Dictionary<(int, int), Color>
                 {
-                    prevLandform.colourSlot(outlineColour, fillColour);
-                }
-                currLandform.colourSlot(clickedOutlineColor, fillColour);
+                    { selectedSlot, clickedOutline }
+                };
                 isSelected = true;
+                prevLandformsOutlined = currLandformsOutlined;
             }
         }
         else
         {
-            Landform prevLandform = null;
-            if (levelObject.terrainInfo.TryGetValue(prevSelectedSlot, out Landform output))
-            {
-                prevLandform = output;
-            }
-            if (prevLandform != null)
-            {
-                prevLandform.colourSlot(outlineColour, fillColour);
-            }
             isSelected = false;
         }
+        foreach (var item in currLandformsOutlined)
+        {
+            changeLandformColour(item.Key, item.Value, fillColour);
+        }
         prevSelectedSlot = selectedSlot;
+    }
+
+    public void changeLandformColour((int, int) slotCoord, Color outlineColour, Color fillColour)
+    {
+        Landform currLandform = levelObject.terrainInfo[slotCoord];
+        currLandform.colourSlot(outlineColour, fillColour);
     }
 
     public void initLevelDetails()
