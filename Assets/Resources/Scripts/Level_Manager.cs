@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Sprites;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 
 
 namespace LevelManager
@@ -78,6 +79,7 @@ namespace LevelManager
 
     public class Level
     {
+        public Character_Controller characterController;
         private int squaresX;
         private int squaresY;
         private (float, float) screenStart;
@@ -134,10 +136,8 @@ namespace LevelManager
             }
         }
 
-        public void designLandforms(Color outlineColour, Color fillColour)
-        {
-            foreach (var item in terrainInfo)
-            {
+        public void designLandforms(Color outlineColour, Color fillColour) {
+            foreach (var item in terrainInfo) {
                 Landform currLandform = item.Value;
                 currLandform.designSlot(SpriteLibrary.squareSprite);
                 currLandform.colourSlot(outlineColour, fillColour);
@@ -170,6 +170,7 @@ namespace LevelManager
             float decimalY = distY / (levelCamera.orthographicSize * 2);
             int slotCoordX = (int)math.floor((decimalX - screenStart.Item1) / percentPerSlot.Item1);
             int slotCoordY = (int)math.floor((decimalY - screenStart.Item2) / percentPerSlot.Item2);
+            // characterController.isCharacterInSlot((slotCoordX, slotCoordY));
             return (slotCoordX, slotCoordY);
         }
 
@@ -189,12 +190,11 @@ namespace LevelManager
             }
             return true;
         }
-        public void PlaceSpriteInSlot((int, int) gridCoord, Sprite sprite)
-        {
-            if (!terrainInfo.TryGetValue(gridCoord, out Landform landform))
-            {
+
+        public GameObject PlaceSpriteInSlot((int, int) gridCoord, Sprite sprite, float scaleX = 0.5f, float scaleY = 0.8f) {
+            if (!terrainInfo.TryGetValue(gridCoord, out Landform landform)) {
                 Debug.LogWarning($"No landform found at grid coordinate {gridCoord}. Cannot place sprite.");
-                return;
+                return null;
             }
 
             // Calculating slot center and size (same logic as in scaleLandforms)
@@ -220,25 +220,15 @@ namespace LevelManager
             SpriteRenderer renderer = spriteObj.AddComponent<SpriteRenderer>();
             renderer.sprite = sprite;
             renderer.sortingOrder = 3; // making sure that the sprite is on top of the grids
-
-            // scaling the sprite down so it looks better in the grid
-            float scaleX = 0.5f;
-            float scaleY = 0.8f;
+            
+            // scaling the sprite to fit the slot
             spriteObj.transform.localScale = new Vector3(slotSize.Item1 * scaleX, slotSize.Item2 * scaleY, 1);
 
             // making sure that the sprite moves/scales with the slot if it the slot is resized (mainly used for the preview where the monster spawners are visible)
             spriteObj.transform.parent = landform.slotOutline.transform;
             spriteObj.transform.localPosition = Vector3.zero;
-        }
-
-        public bool isOccupied((int, int) gridCoord)
-        {
-            return occupationInfo.ContainsKey(gridCoord);
-        }
-
-        public void addThingOnField(Thing newThing, (int, int) gridCoord)
-        {
-            occupationInfo[gridCoord] = newThing;
+            
+            return spriteObj;
         }
     }
 }

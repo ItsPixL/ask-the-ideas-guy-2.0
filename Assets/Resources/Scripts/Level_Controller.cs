@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using LevelManager;
 using UnityEngine;
 using Sprites;
+using UnityEditor.Build.Content;
 
 public class Level_Controller : MonoBehaviour
 {
@@ -14,13 +15,11 @@ public class Level_Controller : MonoBehaviour
     private int turnsRemaining;
     private Level levelObject;
     private bool isSelected = false;
-    private (int, int) prevSelectedSlot = (int.MinValue, int.MinValue);
-    private (int, int) currPlayerPos = (int.MinValue, int.MinValue);
-    private Color defaultOutline = new Color(0.8f, 0.1f, 0.1f, 1f);
-    private Color clickedOutline = new Color(0.94f, 0.86f, 0.2f, 1f); // Outline for the square that has been clicked on.
-    private Color otherOutline; // Use this for other outlines (e.g. available movement spaces). 
-    private Color fillColour = new Color(0.35f, 0.75f, 0.87f, 0.65f);
-    private Dictionary<(int, int), Color> prevLandformsOutlined = new Dictionary<(int, int), Color>();
+    private (int, int) prevSelectedSlot = (-1, -1);
+    private (int, int) selectedSlot = (-1, -1);
+    public Color outlineColour = new Color(0.8f, 0.1f, 0.1f, 1f);
+    public Color clickedOutlineColor = new Color(0.94f, 0.86f, 0.2f, 1f);
+    public Color fillColour = new Color(0.35f, 0.75f, 0.87f, 0.65f);
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -46,32 +45,58 @@ public class Level_Controller : MonoBehaviour
 
     public void respondToMouse()
     {
-        (int, int) selectedSlot = levelObject.calculateClick(Input.mousePosition);
-        Dictionary<(int, int), Color> currLandformsOutlined = new Dictionary<(int, int), Color>();
-        bool isValid = levelObject.isInField(selectedSlot);
-        foreach (var item in prevLandformsOutlined)
-        {
-            changeLandformColour(item.Key, defaultOutline, fillColour);
-        }
-        prevLandformsOutlined = new Dictionary<(int, int), Color>();
-        if (isValid)
-        {
-            if (selectedSlot == prevSelectedSlot && isSelected)
-            {
-                isSelected = false;
+        selectedSlot = levelObject.calculateClick(Input.mousePosition);
+        bool isValid = levelObject.hasSelectedSlot(selectedSlot);
+        bool isReachable = levelObject.characterController.highlightedSlots.Contains(selectedSlot);
+        
+        if (isValid) {
+            Landform currLandform = levelObject.terrainInfo[selectedSlot];
+            if (isReachable) {
+                levelObject.characterController.moveCharacter(selectedSlot);
+                return;
             }
-            else
-            {
-                currLandformsOutlined = new Dictionary<(int, int), Color>
-                {
-                    { selectedSlot, clickedOutline }
-                };
+            if (levelObject.characterController.currentPosition == selectedSlot) {
+                levelObject.characterController.HighlightReachableGrids(3);
+            } else {
+                levelObject.characterController.ClearHighlights();
+            }
+            Landform prevLandform = null;
+            if (levelObject.terrainInfo.TryGetValue(prevSelectedSlot, out Landform output)) {
+                prevLandform = output;
+            }
+            if (selectedSlot == prevSelectedSlot) {
+                if (isSelected) {
+                    if (!levelObject.characterController.highlightedSlots.Contains(selectedSlot)) {
+                        currLandform.colourSlot(outlineColour, fillColour);
+                        prevLandform.colourSlot(outlineColour, fillColour);
+                    } else {
+                        if (!levelObject.characterController.highlightedSlots.Contains(selectedSlot)) {
+                        currLandform.colourSlot(clickedOutlineColor, fillColour);
+                        }
+                    }
+                }
+                isSelected = !isSelected;
+            }
+            else {
+                if (prevLandform != null && !levelObject.characterController.highlightedSlots.Contains(prevSelectedSlot)) {
+                    prevLandform.colourSlot(outlineColour, fillColour);
+                }
+                if (!levelObject.characterController.highlightedSlots.Contains(selectedSlot)) {
+                    currLandform.colourSlot(clickedOutlineColor, fillColour);
+                }
                 isSelected = true;
                 prevLandformsOutlined = currLandformsOutlined;
             }
         }
-        else
-        {
+        else {
+            levelObject.characterController.ClearHighlights();
+            Landform prevLandform = null;
+            if (levelObject.terrainInfo.TryGetValue(prevSelectedSlot, out Landform output)) {
+                prevLandform = output;
+            }
+            if (prevLandform != null) {
+                prevLandform.colourSlot(outlineColour, fillColour);
+            }
             isSelected = false;
         }
         foreach (var item in currLandformsOutlined)
@@ -87,14 +112,15 @@ public class Level_Controller : MonoBehaviour
         currLandform.colourSlot(outlineColour, fillColour);
     }
 
-    public void initLevelDetails()
-    {
-        if (levelNum == 0) // Level 0 will be treated as testing grounds.
-        {
-            playerTurns = 0;
-            monsterTurns = 1;
-            turnsRemaining = monsterTurns;
+    public void initLevelDetails() {
+        if (levelNum == 1) {
+            GameStateManager.Instance.SetState(GameStateManager.GameState.InGame);
+            GameStateManager.Instance.SetInGameSubState(GameStateManager.InGameSubState.PlayerTurn);
             levelObject = new Level(8, 8, (32.5f, 7.5f), (60f, 85f), GameObject.Find("Main Camera"));
+            GameObject characterGO = new GameObject("Player");
+            characterGO.AddComponent<Character_Controller>();
+            levelObject.characterController = characterGO.GetComponent<Character_Controller>();
+            (int, int) startingPosition = levelObject.characterController.getStartingPosition();
             // A test case to check that modifications work.
             Dictionary<string, List<(int, int)>> modifications = new Dictionary<string, List<(int, int)>>
             {
@@ -105,8 +131,12 @@ public class Level_Controller : MonoBehaviour
             levelObject.designLandforms(defaultOutline, fillColour);
             /* levelObject.PlaceSpriteInSlot((3, 5), SpriteLibrary.squareSprite); // must place the sprite after the landforms are designed
             levelObject.PlaceSpriteInSlot((3, 6), SpriteLibrary.circleSprite);
-            levelObject.PlaceSpriteInSlot((4, 5), SpriteLibrary.triangleSprite); */
-            levelObject.scaleLandforms((2f, 3f)); 
+            levelObject.PlaceSpriteInSlot((4, 5), SpriteLibrary.triangleSprite);
+            levelObject.scaleLandforms((2f, 3f));
+            levelObject.characterController.levelObject = levelObject;
+            levelObject.characterController.moveCharacter(startingPosition);
+            levelObject.characterController.AddXP(100); // Adding some XP for testing
+
         }
     }
 }
