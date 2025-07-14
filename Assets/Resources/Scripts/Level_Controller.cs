@@ -45,6 +45,9 @@ public class Level_Controller : MonoBehaviour
         if (isValid)
         {
             Landform currLandform = levelObject.terrainInfo[selectedSlot];
+            if (levelObject.characterController.currentPosition == selectedSlot) {
+                levelObject.characterController.HighlightReachableGrids(3);
+            }
             Landform prevLandform = null;
             if (levelObject.terrainInfo.TryGetValue(prevSelectedSlot, out Landform output))
             {
@@ -94,6 +97,10 @@ public class Level_Controller : MonoBehaviour
         if (levelNum == 1)
         {
             levelObject = new Level(8, 8, (32.5f, 7.5f), (60f, 85f), GameObject.Find("Main Camera"));
+            GameObject characterGO = new GameObject("Player");
+            characterGO.AddComponent<Character_Controller>();
+            levelObject.characterController = characterGO.GetComponent<Character_Controller>();
+            (int, int) startingPosition = levelObject.characterController.getStartingPosition();
             // A test case to check that modifications work.
             /* Dictionary<string, List<(int, int)>> modifications = new Dictionary<string, List<(int, int)>>
             {
@@ -104,6 +111,9 @@ public class Level_Controller : MonoBehaviour
             levelObject.PlaceSpriteInSlot((3, 5), SpriteLibrary.squareSprite); // must place the sprite after the landforms are designed
             levelObject.PlaceSpriteInSlot((3, 6), SpriteLibrary.circleSprite);
             levelObject.PlaceSpriteInSlot((4, 5), SpriteLibrary.triangleSprite);
+            levelObject.PlaceSpriteInSlot(startingPosition, SpriteLibrary.mainCharacterSprite, 0.05f, 0.1f);
+            levelObject.characterController.currentPosition = startingPosition;
+            levelObject.characterController.levelObject = levelObject;
             levelObject.scaleLandforms((2f, 3f));
 
         }
