@@ -41,7 +41,7 @@ public class Level_Controller : MonoBehaviour
     public void respondToMouse()
     {
         selectedSlot = levelObject.calculateClick(Input.mousePosition);
-        bool isValid = levelObject.hasSelectedSlot(selectedSlot);
+        bool isValid = levelObject.isInField(selectedSlot);
         if (isValid)
         {
             Landform currLandform = levelObject.terrainInfo[selectedSlot];
@@ -91,21 +91,21 @@ public class Level_Controller : MonoBehaviour
 
     public void initLevelDetails()
     {
-        if (levelNum == 1)
+        if (levelNum == 0) // Level 0 will be treated as testing grounds.
         {
             levelObject = new Level(8, 8, (32.5f, 7.5f), (60f, 85f), GameObject.Find("Main Camera"));
             // A test case to check that modifications work.
-            /* Dictionary<string, List<(int, int)>> modifications = new Dictionary<string, List<(int, int)>>
+            Dictionary<string, List<(int, int)>> modifications = new Dictionary<string, List<(int, int)>>
             {
-                { "none", new List<(int, int)> { (4, 7) } }
+                { "none", new List<(int, int)> { (4, 7) }},
+                {"wall", new List<(int, int)>{(1, 2), (2, 2), (3, 2), (4, 2)}}
             };
-            levelObject.modifyLandforms(modifications); */
+            levelObject.modifyLandforms(modifications);
             levelObject.designLandforms(new Color(0.8f, 0.1f, 0.1f, 1f), new Color(0.35f, 0.75f, 0.87f, 0.65f));
             levelObject.PlaceSpriteInSlot((3, 5), SpriteLibrary.squareSprite); // must place the sprite after the landforms are designed
             levelObject.PlaceSpriteInSlot((3, 6), SpriteLibrary.circleSprite);
             levelObject.PlaceSpriteInSlot((4, 5), SpriteLibrary.triangleSprite);
             levelObject.scaleLandforms((2f, 3f));
-
         }
     }
 }
