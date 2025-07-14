@@ -10,11 +10,12 @@ public class Level_Controller : MonoBehaviour
     public int levelNum = 0;
     private int playerTurns;
     private int monsterTurns;
-    private bool isPlayerTurn;
+    private bool isPlayerTurn = false;
     private int turnsRemaining;
     private Level levelObject;
     private bool isSelected = false;
     private (int, int) prevSelectedSlot = (int.MinValue, int.MinValue);
+    private (int, int) currPlayerPos = (int.MinValue, int.MinValue);
     private Color defaultOutline = new Color(0.8f, 0.1f, 0.1f, 1f);
     private Color clickedOutline = new Color(0.94f, 0.86f, 0.2f, 1f); // Outline for the square that has been clicked on.
     private Color otherOutline; // Use this for other outlines (e.g. available movement spaces). 
@@ -90,6 +91,9 @@ public class Level_Controller : MonoBehaviour
     {
         if (levelNum == 0) // Level 0 will be treated as testing grounds.
         {
+            playerTurns = 0;
+            monsterTurns = 1;
+            turnsRemaining = monsterTurns;
             levelObject = new Level(8, 8, (32.5f, 7.5f), (60f, 85f), GameObject.Find("Main Camera"));
             // A test case to check that modifications work.
             Dictionary<string, List<(int, int)>> modifications = new Dictionary<string, List<(int, int)>>
@@ -98,11 +102,11 @@ public class Level_Controller : MonoBehaviour
                 {"wall", new List<(int, int)>{(1, 2), (2, 2), (3, 2), (4, 2)}}
             };
             levelObject.modifyLandforms(modifications);
-            levelObject.designLandforms(new Color(0.8f, 0.1f, 0.1f, 1f), new Color(0.35f, 0.75f, 0.87f, 0.65f));
-            levelObject.PlaceSpriteInSlot((3, 5), SpriteLibrary.squareSprite); // must place the sprite after the landforms are designed
+            levelObject.designLandforms(defaultOutline, fillColour);
+            /* levelObject.PlaceSpriteInSlot((3, 5), SpriteLibrary.squareSprite); // must place the sprite after the landforms are designed
             levelObject.PlaceSpriteInSlot((3, 6), SpriteLibrary.circleSprite);
-            levelObject.PlaceSpriteInSlot((4, 5), SpriteLibrary.triangleSprite);
-            levelObject.scaleLandforms((2f, 3f));
+            levelObject.PlaceSpriteInSlot((4, 5), SpriteLibrary.triangleSprite); */
+            levelObject.scaleLandforms((2f, 3f)); 
         }
     }
 }
