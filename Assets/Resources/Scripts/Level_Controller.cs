@@ -97,10 +97,10 @@ public class Level_Controller : MonoBehaviour
         prevSelectedSlot = selectedSlot;
     }
 
-    public void initLevelDetails()
-    {
-        if (levelNum == 1)
-        {
+    public void initLevelDetails() {
+        if (levelNum == 1) {
+            GameStateManager.Instance.SetState(GameStateManager.GameState.InGame);
+            GameStateManager.Instance.SetInGameSubState(GameStateManager.InGameSubState.PlayerTurn);
             levelObject = new Level(8, 8, (32.5f, 7.5f), (60f, 85f), GameObject.Find("Main Camera"));
             GameObject characterGO = new GameObject("Player");
             characterGO.AddComponent<Character_Controller>();
@@ -120,8 +120,7 @@ public class Level_Controller : MonoBehaviour
             levelObject.characterController.levelObject = levelObject;
             levelObject.characterController.moveCharacter(startingPosition);
             levelObject.characterController.AddXP(100); // Adding some XP for testing
-            GameStateManager.Instance.SetState(GameStateManager.GameState.InGame);
-            GameStateManager.Instance.SetInGameSubState(GameStateManager.InGameSubState.PlayerTurn);
+
         }
     }
 }
