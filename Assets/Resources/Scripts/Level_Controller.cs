@@ -118,6 +118,7 @@ public class Level_Controller : MonoBehaviour
             levelObject.scaleLandforms((2f, 3f));
             levelObject.characterController.levelObject = levelObject;
             levelObject.characterController.moveCharacter(startingPosition);
+            levelObject.characterController.AddXP(100); // Adding some XP for testing
         }
     }
 }

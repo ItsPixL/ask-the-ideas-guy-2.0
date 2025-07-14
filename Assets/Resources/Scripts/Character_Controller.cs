@@ -16,6 +16,10 @@ public class Character_Controller : MonoBehaviour {
     public Color fillColour = new Color(0.35f, 0.75f, 0.87f, 0.65f);
     private GameObject characterSpriteObj = null;
     public List<(int, int)> highlightedSlots = new List<(int, int)>();
+    public int health = 60;
+    public int xp = 0;
+    public List<int> xpRequirements = new List<int> { 100, 250, 500, 900, 1400 };
+    public int currentLevel = 1;
     public (int, int) getStartingPosition() {
         // need to code this later
         startingPosition = (0, 0);
@@ -35,28 +39,6 @@ public class Character_Controller : MonoBehaviour {
         // clear highlights after moving
         ClearHighlights();
     }
-    
-    // public bool isCharacterInSlot((int, int) slotCoord) {
-    //     bool hasMainCharacterSprite = false;
-    //     foreach (Transform child in landform.slotOutline.transform) {
-    //         SpriteRenderer spriteRenderer = child.GetComponent<SpriteRenderer>();
-    //         if (spriteRenderer != null && spriteRenderer.sprite == SpriteLibrary.mainCharacterSprite) {
-    //             hasMainCharacterSprite = true;
-    //             break;
-    //         }
-    //     }
-    //     if (!hasMainCharacterSprite) {
-    //         return false; // No main character sprite found in the slot
-    //     }
-    //     else {
-    //         OnMouseDown(); // Call the method to highlight reachable grids
-    //         return hasMainCharacterSprite && currentPosition == slotCoord;
-    //     }
-    // }
-    // private void OnMouseDown() {
-    //     int maxTravelDistance = 3; // Example value, or pass as parameter
-    //     HighlightReachableGrids(maxTravelDistance);
-    // }
     
     public void ClearHighlights() {
         foreach (var slot in highlightedSlots) {
@@ -86,6 +68,28 @@ public class Character_Controller : MonoBehaviour {
                     }
                 }
             }
+        }
+    }
+    
+    // xp related stuff
+    public void AddXP(int amount) {
+        xp += amount;
+        Debug.Log($"Added {amount} XP. Total XP: {xp}");
+        CheckLevelUp();
+    }
+
+    private void CheckLevelUp() {
+        int requiredXP = xpRequirements[currentLevel - 1]; // the current level starts at 1
+        while (xp >= requiredXP) {
+            xp -= requiredXP; // reseting the XP to zero after leveling up
+            currentLevel++;
+            health += 10; // Will have to create a dictionary if the amount of health gained per level is different
+            if (currentLevel - 1 <= xpRequirements.Count) {
+                requiredXP = xpRequirements[currentLevel - 1];
+            } else {
+                Debug.Log("No more levels left");
+            }
+            Debug.Log($"Level up! New level: {currentLevel}, Health: {health}, XP for next level: {requiredXP}");
         }
     }
 }
