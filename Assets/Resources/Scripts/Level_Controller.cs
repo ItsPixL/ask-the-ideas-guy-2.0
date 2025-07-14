@@ -9,10 +9,6 @@ public class Level_Controller : MonoBehaviour
     private int screenWidth;
     private int screenHeight;
     public int levelNum = 0;
-    private int playerTurns;
-    private int monsterTurns;
-    private bool isPlayerTurn = false;
-    private int turnsRemaining;
     private Level levelObject;
     private bool isSelected = false;
     private (int, int) prevSelectedSlot = (-1, -1);
@@ -46,7 +42,7 @@ public class Level_Controller : MonoBehaviour
     public void respondToMouse()
     {
         selectedSlot = levelObject.calculateClick(Input.mousePosition);
-        bool isValid = levelObject.hasSelectedSlot(selectedSlot);
+        bool isValid = levelObject.isInField(selectedSlot);
         bool isReachable = levelObject.characterController.highlightedSlots.Contains(selectedSlot);
         
         if (isValid) {
@@ -85,7 +81,6 @@ public class Level_Controller : MonoBehaviour
                     currLandform.colourSlot(clickedOutlineColor, fillColour);
                 }
                 isSelected = true;
-                prevLandformsOutlined = currLandformsOutlined;
             }
         }
         else {
@@ -99,21 +94,11 @@ public class Level_Controller : MonoBehaviour
             }
             isSelected = false;
         }
-        foreach (var item in currLandformsOutlined)
-        {
-            changeLandformColour(item.Key, item.Value, fillColour);
-        }
         prevSelectedSlot = selectedSlot;
     }
 
-    public void changeLandformColour((int, int) slotCoord, Color outlineColour, Color fillColour)
-    {
-        Landform currLandform = levelObject.terrainInfo[slotCoord];
-        currLandform.colourSlot(outlineColour, fillColour);
-    }
-
     public void initLevelDetails() {
-        if (levelNum == 1) {
+        if (levelNum == 0) { // Level 0 will be used as testing grounds.
             GameStateManager.Instance.SetState(GameStateManager.GameState.InGame);
             GameStateManager.Instance.SetInGameSubState(GameStateManager.InGameSubState.PlayerTurn);
             levelObject = new Level(8, 8, (32.5f, 7.5f), (60f, 85f), GameObject.Find("Main Camera"));
@@ -122,14 +107,13 @@ public class Level_Controller : MonoBehaviour
             levelObject.characterController = characterGO.GetComponent<Character_Controller>();
             (int, int) startingPosition = levelObject.characterController.getStartingPosition();
             // A test case to check that modifications work.
-            Dictionary<string, List<(int, int)>> modifications = new Dictionary<string, List<(int, int)>>
+            /* Dictionary<string, List<(int, int)>> modifications = new Dictionary<string, List<(int, int)>>
             {
-                { "none", new List<(int, int)> { (4, 7) }},
-                {"wall", new List<(int, int)>{(1, 2), (2, 2), (3, 2), (4, 2)}}
+                { "none", new List<(int, int)> { (4, 7) } }
             };
-            levelObject.modifyLandforms(modifications);
-            levelObject.designLandforms(defaultOutline, fillColour);
-            /* levelObject.PlaceSpriteInSlot((3, 5), SpriteLibrary.squareSprite); // must place the sprite after the landforms are designed
+            levelObject.modifyLandforms(modifications); */
+            levelObject.designLandforms(new Color(0.8f, 0.1f, 0.1f, 1f), new Color(0.35f, 0.75f, 0.87f, 0.65f));
+            levelObject.PlaceSpriteInSlot((3, 5), SpriteLibrary.squareSprite); // must place the sprite after the landforms are designed
             levelObject.PlaceSpriteInSlot((3, 6), SpriteLibrary.circleSprite);
             levelObject.PlaceSpriteInSlot((4, 5), SpriteLibrary.triangleSprite);
             levelObject.scaleLandforms((2f, 3f));

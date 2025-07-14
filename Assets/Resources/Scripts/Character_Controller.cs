@@ -36,7 +36,7 @@ public class Character_Controller : MonoBehaviour {
         }
         // Destroy the old sprite if it exists
         if (characterSpriteObj != null) {
-            GameObject.Destroy(characterSpriteObj);
+            Destroy(characterSpriteObj);
         }
         // moving the character visually
         characterSpriteObj = levelObject.PlaceSpriteInSlot(newPosition, SpriteLibrary.mainCharacterSprite, scaleX, scaleY);
@@ -52,7 +52,7 @@ public class Character_Controller : MonoBehaviour {
     
     public void ClearHighlights() {
         foreach (var slot in highlightedSlots) {
-            if (levelObject.hasSelectedSlot(slot)) {
+            if (levelObject.isInField(slot)) {
                 Landform lf = levelObject.terrainInfo[slot];
                 lf.colourSlot(outlineColour, fillColour);
             }
@@ -74,9 +74,9 @@ public class Character_Controller : MonoBehaviour {
                 int ny = currentPosition.Item2 + dy;
                 if ((nx, ny) == currentPosition) continue; // skip current position
                 if (Mathf.Abs(dx) + Mathf.Abs(dy) <= maxTravelDistance) { // Manhattan distance
-                    if (levelObject.hasSelectedSlot((nx, ny))) {
+                    if (levelObject.isInField((nx, ny))) {
                         Landform lf = levelObject.terrainInfo[(nx, ny)];
-                        if (lf.isWall) continue; // skip walls
+                        if (!lf.canTravelThrough) continue; // skip any landforms that the player can't travel through (e.g. walls)
                         highlightedSlots.Add((nx, ny));
                         Debug.Log($"Reachable slot: ({nx}, {ny})");
                         lf.colourSlot(movableOutlineColour, movableFillColour);

@@ -57,7 +57,7 @@ namespace MonsterManager
             if (monsterType == "brute")
             {
                 Brute newBrute = new Brute(SpriteLibrary.bruteSprite, gridCoords, spawnedBasicStats);
-                levelObject.addThingOnField(newBrute, gridCoords);
+                // levelObject.addThingOnField(newBrute, gridCoords);
             }
         }
 
@@ -74,7 +74,7 @@ namespace MonsterManager
                     List<(int, int)> validSpawnPos = new List<(int, int)>();
                     foreach (var item in possibleSpawnPos)
                     {
-                        if (levelObject.isInField(item) && !levelObject.isOccupied(item))
+                        if (levelObject.isInField(item)) // && !levelObject.isOccupied(item))
                         {
                             validSpawnPos.Add(item);
                         }
