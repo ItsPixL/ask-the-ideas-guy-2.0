@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Sprites;
 using LevelManager;
-using UnityEngine.TextCore.Text;
 
 public class Character_Controller : MonoBehaviour {
     public Landform landform;
@@ -20,6 +19,7 @@ public class Character_Controller : MonoBehaviour {
     public int xp = 0;
     public List<int> xpRequirements = new List<int> { 100, 250, 500, 900, 1400 };
     public int currentLevel = 1;
+    private int playerTurns = 0; // used to give the player multiple turns before the monster turn. must keep in mind that the first moveCharacter is just placing the character down
     public (int, int) getStartingPosition() {
         // need to code this later
         startingPosition = (0, 0);
@@ -28,6 +28,12 @@ public class Character_Controller : MonoBehaviour {
         return startingPosition;
     }
     public void moveCharacter((int, int) newPosition, float scaleX = 0.05f, float scaleY = 0.05f) {
+        playerTurns += 1;
+        if (GameStateManager.Instance.CurrentState != GameStateManager.GameState.InGame ||
+            GameStateManager.Instance.CurrentInGameSubState != GameStateManager.InGameSubState.PlayerTurn) {
+            Debug.LogWarning("Cannot highlight reachable grids when not in PlayerTurn state.");
+            return;
+        }
         // Destroy the old sprite if it exists
         if (characterSpriteObj != null) {
             GameObject.Destroy(characterSpriteObj);
@@ -38,6 +44,10 @@ public class Character_Controller : MonoBehaviour {
         landform = levelObject.terrainInfo[newPosition];
         // clear highlights after moving
         ClearHighlights();
+        if (playerTurns > 2) {
+            GameStateManager.Instance.SetInGameSubState(GameStateManager.InGameSubState.MonsterTurn);
+            playerTurns = 0;
+        }
     }
     
     public void ClearHighlights() {
@@ -53,6 +63,11 @@ public class Character_Controller : MonoBehaviour {
     public void HighlightReachableGrids(int maxTravelDistance) {
         ClearHighlights();
         highlightedSlots.Clear();
+        if (GameStateManager.Instance.CurrentState != GameStateManager.GameState.InGame ||
+            GameStateManager.Instance.CurrentInGameSubState != GameStateManager.InGameSubState.PlayerTurn) {
+            Debug.LogWarning("Cannot highlight reachable grids when not in PlayerTurn state.");
+            return;
+        }
         for (int dx = -maxTravelDistance; dx <= maxTravelDistance; dx++) {
             for (int dy = -maxTravelDistance; dy <= maxTravelDistance; dy++) {
                 int nx = currentPosition.Item1 + dx;
