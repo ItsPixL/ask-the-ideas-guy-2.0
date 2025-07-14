@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using LevelManager;
 using UnityEngine;
 using Sprites;
+using UnityEditor.Build.Content;
 
 public class Level_Controller : MonoBehaviour
 {
@@ -119,6 +120,8 @@ public class Level_Controller : MonoBehaviour
             levelObject.characterController.levelObject = levelObject;
             levelObject.characterController.moveCharacter(startingPosition);
             levelObject.characterController.AddXP(100); // Adding some XP for testing
+            GameStateManager.Instance.SetState(GameStateManager.GameState.InGame);
+            GameStateManager.Instance.SetInGameSubState(GameStateManager.InGameSubState.PlayerTurn);
         }
     }
 }

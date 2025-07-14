@@ -53,6 +53,7 @@ public class Character_Controller : MonoBehaviour {
     public void HighlightReachableGrids(int maxTravelDistance) {
         ClearHighlights();
         highlightedSlots.Clear();
+        
         for (int dx = -maxTravelDistance; dx <= maxTravelDistance; dx++) {
             for (int dy = -maxTravelDistance; dy <= maxTravelDistance; dy++) {
                 int nx = currentPosition.Item1 + dx;
