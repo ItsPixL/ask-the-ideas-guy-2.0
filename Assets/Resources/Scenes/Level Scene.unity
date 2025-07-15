@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2674c49adfeda41a1a98c8d8804155ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelNum: 1
+  levelNum: 0
   outlineColour: {r: 0.8, g: 0.1, b: 0.1, a: 1}
   clickedOutlineColor: {r: 0.94, g: 0.86, b: 0.2, a: 1}
   fillColour: {r: 0.35, g: 0.75, b: 0.87, a: 0.65}

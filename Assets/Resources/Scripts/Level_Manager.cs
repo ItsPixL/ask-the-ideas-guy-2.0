@@ -11,11 +11,13 @@ namespace LevelManager
     {
         public Sprite thingSprite;
         public (int, int) coordPos;
+        public Level levelObject;
     }
     public class Landform
     {
         public bool isNormal = true; // This allows the landform class to also be an instance of a normal slot, not just an abstract class. 
         public bool canTravelThrough = true;
+        public bool canSeePast = true;
         public GameObject slotOutline = null;
         protected SpriteRenderer outlineRenderer = null;
         protected GameObject slotFill = null;
@@ -61,6 +63,7 @@ namespace LevelManager
         {
             isNormal = false;
             canTravelThrough = false;
+            canSeePast = false;
         }
 
         public override void designSlot(Sprite sprite)
@@ -136,8 +139,10 @@ namespace LevelManager
             }
         }
 
-        public void designLandforms(Color outlineColour, Color fillColour) {
-            foreach (var item in terrainInfo) {
+        public void designLandforms(Color outlineColour, Color fillColour)
+        {
+            foreach (var item in terrainInfo)
+            {
                 Landform currLandform = item.Value;
                 currLandform.designSlot(SpriteLibrary.squareSprite);
                 currLandform.colourSlot(outlineColour, fillColour);
@@ -191,8 +196,10 @@ namespace LevelManager
             return true;
         }
 
-        public GameObject PlaceSpriteInSlot((int, int) gridCoord, Sprite sprite, float scaleX = 0.5f, float scaleY = 0.8f) {
-            if (!terrainInfo.TryGetValue(gridCoord, out Landform landform)) {
+        public GameObject PlaceSpriteInSlot((int, int) gridCoord, Sprite sprite, float scaleX = 0.5f, float scaleY = 0.8f)
+        {
+            if (!terrainInfo.TryGetValue(gridCoord, out Landform landform))
+            {
                 Debug.LogWarning($"No landform found at grid coordinate {gridCoord}. Cannot place sprite.");
                 return null;
             }
@@ -220,15 +227,20 @@ namespace LevelManager
             SpriteRenderer renderer = spriteObj.AddComponent<SpriteRenderer>();
             renderer.sprite = sprite;
             renderer.sortingOrder = 3; // making sure that the sprite is on top of the grids
-            
+
             // scaling the sprite to fit the slot
             spriteObj.transform.localScale = new Vector3(slotSize.Item1 * scaleX, slotSize.Item2 * scaleY, 1);
 
             // making sure that the sprite moves/scales with the slot if it the slot is resized (mainly used for the preview where the monster spawners are visible)
             spriteObj.transform.parent = landform.slotOutline.transform;
             spriteObj.transform.localPosition = Vector3.zero;
-            
+
             return spriteObj;
+        }
+
+        public bool isOccupied((int, int) gridCoord)
+        {
+            return occupationInfo.ContainsKey(gridCoord) || (characterController.currentPosition == gridCoord);
         }
     }
 }
