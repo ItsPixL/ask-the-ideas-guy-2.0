@@ -8,12 +8,12 @@ public class Bow_and_Arrow : Weapon {
         damage = 3;
     }
 
-    // Highlights the tile north of the player (range 2, north)
+    // Highlights the tile north of the player (range 3, north)
     public override void HighlightAOE((int, int) position, Level levelObject) {
         int nx = position.Item1;
         int ny = position.Item2;
 
-        for (int i = 1; i <= 2; i++) {
+        for (int i = 1; i <= 3; i++) {
             var target = (nx, ny + i);
             if (levelObject.isInField(target)) {
                 Landform lf = levelObject.terrainInfo[target];
@@ -52,7 +52,7 @@ public class Bow_and_Arrow : Weapon {
             }
         }
 
-        Debug.Log($"Dagger used! Dealing {damage} damage to ({nx}, {ny})");
+        Debug.Log($"Bow and Arrow used! Dealing {damage} damage to ({nx}, {ny})");
         player.checkTurnCount();
     }
 }
