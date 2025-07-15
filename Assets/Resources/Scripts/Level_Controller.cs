@@ -139,7 +139,6 @@ public class Level_Controller : MonoBehaviour
             // Deploys the character.
             levelObject.characterController.moveCharacter(startingPosition);
             levelObject.characterController.AddXP(100); // Adding some XP for testing
-
         }
     }
 }
