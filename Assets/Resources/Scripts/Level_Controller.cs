@@ -136,6 +136,9 @@ public class Level_Controller : MonoBehaviour
             List<int> bruteBasicStats = new List<int>() { 25, 1, 16, 1, 3 };
             MonsterSpawner testSpawner = new MonsterSpawner(SpriteLibrary.spawnerSprite, (4, 7), "brute", bruteBasicStats, levelObject);
             testSpawner.displaySpawner();
+            // Initialises and displays the weapons.
+            Sprite mySwordSprite = SpriteLibrary.swordSprite;
+            Sword sword = Weapon.SpawnWeapon<Sword>(new Vector3(-5, 0, 0), mySwordSprite);
             // Deploys the character.
             levelObject.characterController.moveCharacter(startingPosition);
             levelObject.characterController.AddXP(100); // Adding some XP for testing

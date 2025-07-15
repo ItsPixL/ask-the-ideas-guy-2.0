@@ -7,7 +7,8 @@ public class GameStateManager : MonoBehaviour {
         InMenu,
         InLevelSelector,
         InPreview,
-        InGame
+        InGame,
+        InStory
     }
 
     public enum InGameSubState { // Sub-states for InGame, automatically set to None when not in InGame state
