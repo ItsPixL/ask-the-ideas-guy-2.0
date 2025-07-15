@@ -6,6 +6,7 @@ public class Sword : Weapon {
     public Sword() {
         weaponName = "Sword";
         damage = 4;
+        range = 1;
     }
 
     // Highlights the tile north of the player (range 1, north)
@@ -17,6 +18,10 @@ public class Sword : Weapon {
         if (levelObject.isInField(target)) {
             Landform lf = levelObject.terrainInfo[target];
             lf.colourSlot(Color.red, new Color(1f, 0.5f, 0.5f, 0.5f));
+
+            // Add to base class tracking
+            var weapon = this as Weapon;
+            weapon?.TrackHighlight(target);
         }
     }
 
@@ -29,9 +34,9 @@ public class Sword : Weapon {
         }
         var player = FindFirstObjectByType<Character_Controller>();
         player.playerTurns += 1;
-        int nx = position.Item1;
-        int ny = position.Item2 + 1;
-        var target = (nx, ny);
+        int px = position.Item1;
+        int py = position.Item2 + 1;
+        var target = (px, py);
 
         var monsterData = levelObject.returnStuffByType(typeof(Monster), typeof(MonsterSpawner));
         Debug.Log($"Monsters in level: {monsterData.Count}");
@@ -49,7 +54,7 @@ public class Sword : Weapon {
             }
         }
         
-        Debug.Log($"Sword used! Dealing {damage} damage to ({nx}, {ny})");
+        Debug.Log($"Sword used! Dealing {damage} damage to ({px}, {py})");
         player.checkTurnCount();
     }
 }

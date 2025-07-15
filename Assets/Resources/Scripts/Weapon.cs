@@ -1,12 +1,14 @@
 using UnityEngine;
 using LevelManager;
+using System.Collections.Generic;
 
 public abstract class Weapon : MonoBehaviour {
     public string weaponName;
     public int damage;
+    public int range;
     public Sprite weaponSprite;
     // highlighting logic
-    private (int, int)? highlightedTile = null;
+    private List<(int, int)> highlightedTiles = new();
     private Level highlightedLevel = null;
     // normal colours
     public Color outlineColour = new Color(0.8f, 0.1f, 0.1f, 1f);
@@ -44,28 +46,30 @@ public abstract class Weapon : MonoBehaviour {
         if (Input.GetMouseButtonDown(1)) {
             var player = FindFirstObjectByType<Character_Controller>();
             if (player != null && player.levelObject != null) {
-                var target = (player.currentPosition.Item1, player.currentPosition.Item2 + 1); // Same tile as Sword logic
-
-                if (highlightedTile.HasValue && highlightedTile.Value == target) { // if it is already highlighted, unhighlight it
+                if (highlightedTiles.Count > 0) { // if there are highlighted tiles, clear them
                     ClearHighlight();
                 } else { // if it is not highlighted, highlight it
                     ClearHighlight(); // in case something else was highlighted
                     HighlightAOE(player.currentPosition, player.levelObject);
-                    highlightedTile = target;
                     highlightedLevel = player.levelObject;
                 }
             }
         }
     }
     private void ClearHighlight() {
-        if (highlightedTile.HasValue && highlightedLevel != null) {
-            var tile = highlightedTile.Value;
-            if (highlightedLevel.isInField(tile)) {
-                Landform lf = highlightedLevel.terrainInfo[tile];
-                lf.colourSlot(outlineColour, fillColour); // Reset to normal (or use default)
+        if (highlightedLevel != null) {
+            foreach (var tile in highlightedTiles) {
+                if (highlightedLevel.isInField(tile)) {
+                    Landform lf = highlightedLevel.terrainInfo[tile];
+                    lf.colourSlot(outlineColour, fillColour); // Reset tile appearance
+                }
             }
         }
-        highlightedTile = null;
+
+        highlightedTiles.Clear();
         highlightedLevel = null;
+    }
+    public void TrackHighlight((int, int) tile) {
+        highlightedTiles.Add(tile);
     }
 }
