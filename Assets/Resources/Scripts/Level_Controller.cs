@@ -110,7 +110,6 @@ public class Level_Controller : MonoBehaviour
         playerMovement(selectedSlot, isReachable);
     }
 
-
     public void initLevelDetails() {
         // Defines general things true to all levels.
         GameStateManager.Instance.SetState(GameStateManager.GameState.InGame);
@@ -134,7 +133,7 @@ public class Level_Controller : MonoBehaviour
             levelObject.scaleLandforms((2f, 3f));
             // Initialises and displays the monster spawner.
             List<int> bruteBasicStats = new List<int>() { 25, 1, 16, 1, 3 };
-            MonsterSpawner testSpawner = new MonsterSpawner(SpriteLibrary.spawnerSprite, (4, 7), "brute", bruteBasicStats, levelObject);
+            MonsterSpawner testSpawner = new MonsterSpawner(SpriteLibrary.spawnerSprite, (4, 7), "brute", bruteBasicStats, levelObject, 100);
             testSpawner.displaySpawner();
             // Initialises and displays the weapons.
             Sprite mySwordSprite = SpriteLibrary.swordSprite;

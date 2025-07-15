@@ -34,19 +34,25 @@ namespace MonsterManager
 
     }
 
-    public class MonsterSpawner: Thing
+    public class MonsterSpawner: Thing, IHasHealth
     {
         public List<(int, int)> possibleSpawnPos;
         public List<int> spawnedBasicStats = new List<int>();
+        public int health;
+        public int Health {
+            get => health;
+            set => health = value;
+        }
         public string monsterType;
         public int turnCooldown;
         public int turnsLeft;
         public bool activated;
 
-        public MonsterSpawner(Sprite spawnerSprite, (int, int) coordPos, string monsterType, List<int> spawnedBasicStats, Level levelObject)
+        public MonsterSpawner(Sprite spawnerSprite, (int, int) coordPos, string monsterType, List<int> spawnedBasicStats, Level levelObject, int health)
         {
             thingSprite = spawnerSprite;
             this.coordPos = coordPos;
+            this.health = health;
             int coordX = coordPos.Item1;
             int coordY = coordPos.Item2;
             possibleSpawnPos = new List<(int, int)> { (coordX - 1, coordY), (coordX + 1, coordY), (coordX, coordY - 1), (coordX, coordY + 1) };

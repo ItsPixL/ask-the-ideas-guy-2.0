@@ -33,7 +33,7 @@ public class Sword : Weapon {
         int ny = position.Item2 + 1;
         var target = (nx, ny);
 
-        var monsterData = levelObject.returnStuffByType(typeof(Monster)); // , typeof(MonsterSpawner) only add if monster spawners can be attacked
+        var monsterData = levelObject.returnStuffByType(typeof(Monster), typeof(MonsterSpawner));
         Debug.Log($"Monsters in level: {monsterData.Count}");
 
         foreach (var (pos, monster, health) in monsterData) {
