@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Sprites;
 using Unity.Mathematics;
-using Unity.VisualScripting;
+using System;
+using System.Linq;
 
 
 namespace LevelManager
@@ -241,6 +242,15 @@ namespace LevelManager
         public bool isOccupied((int, int) gridCoord)
         {
             return occupationInfo.ContainsKey(gridCoord) || (characterController.currentPosition == gridCoord);
+        }
+
+        // Use this to return all monsters, monster spawners, items etc. on the grid.
+        public List<Thing> returnThingsByType(params Type[] types)
+        {
+            return occupationInfo
+                .Where(kv => types.Any(t => t.IsInstanceOfType(kv.Value)))
+                .Select(kv => kv.Value)
+                .ToList();
         }
     }
 }

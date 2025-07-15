@@ -51,7 +51,7 @@ public class Character_Controller : MonoBehaviour
         // clear highlights after moving
         ClearHighlights();
         // Checks if the player's used all of his turns.
-        checkTurnUsage();
+        checkTurnCount();
     }
 
     public void ClearHighlights()
@@ -127,7 +127,7 @@ public class Character_Controller : MonoBehaviour
         }
     }
 
-    private void checkTurnUsage()
+    private void checkTurnCount()
     {
         Debug.Log($"Player turns used: {playerTurns}");
         Debug.Log($"Allowed turns: {allowedTurns}");
