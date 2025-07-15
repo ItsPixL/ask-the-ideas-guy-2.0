@@ -5,13 +5,17 @@ using System.Collections.Generic;
 
 namespace MonsterManager
 {
-    public abstract class Monster : Thing
+    public abstract class Monster : Thing, IHasHealth
     {
         public int health;
         public int damage;
         public int movement;
         public int attackRange;
         public int sightRange;
+        public int Health {
+            get => health;
+            set => health = value;
+        }
     }
 
     public class Brute : Monster

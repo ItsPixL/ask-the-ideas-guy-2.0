@@ -14,6 +14,10 @@ namespace LevelManager
         public (int, int) coordPos;
         public Level levelObject;
     }
+    public interface IHasHealth // interface for getting health
+    {
+        int Health { get; set; } // read/write
+    }
     public class Landform
     {
         public bool isNormal = true; // This allows the landform class to also be an instance of a normal slot, not just an abstract class. 
@@ -251,6 +255,26 @@ namespace LevelManager
                 .Where(kv => types.Any(t => t.IsInstanceOfType(kv.Value)))
                 .Select(kv => kv.Value)
                 .ToList();
+        }
+        public List<((int, int) position, Thing thing, int health)> returnStuffByType(params Type[] types) {
+            return occupationInfo
+                .Where(kv => types.Any(t => t.IsInstanceOfType(kv.Value)))
+                .Select(kv => (
+                    position: kv.Key,
+                    thing: kv.Value,
+                    health: GetHealthSafe(kv.Value)
+                ))
+                .ToList();
+        }
+
+        private int GetHealthSafe(Thing thing)
+        {
+            if (thing is IHasHealth hasHealth) // creating an interface to get health, alternative is to hard code but it will be messy
+            {
+                Debug.Log($"Health of {thing.GetType().Name} at {thing.coordPos}: {hasHealth.Health}");
+                return hasHealth.Health;
+            }
+            return 0; // Default value if health is not applicable
         }
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using LevelManager;
+using MonsterManager;
 
 public class Sword : Weapon {
     public Sword() {
@@ -31,6 +32,23 @@ public class Sword : Weapon {
         int nx = position.Item1;
         int ny = position.Item2 + 1;
         var target = (nx, ny);
+
+        var monsterData = levelObject.returnStuffByType(typeof(Monster)); // , typeof(MonsterSpawner) only add if monster spawners can be attacked
+        Debug.Log($"Monsters in level: {monsterData.Count}");
+
+        foreach (var (pos, monster, health) in monsterData) {
+            Debug.Log($"Thing: {monster.GetType().Name} at ({pos.Item1}, {pos.Item2}) has {health} HP");
+            if (pos == target && monster is IHasHealth hasHealth) { // checking if monster is in the target position and has health
+                hasHealth.Health -= damage;
+                Debug.Log($"Dealt {damage} damage to {monster.GetType().Name} at ({pos.Item1}, {pos.Item2}). Remaining health: {hasHealth.Health}");
+                if (hasHealth.Health <= 0) { // replace with checking if monster died function when created
+                    Debug.Log($"{monster.GetType().Name} at ({pos.Item1}, {pos.Item2}) has been defeated!");
+                    // Remove the monster from the level
+                }
+                return; // Exit after applying damage
+            }
+        }
+
 
         // Example: If there's an enemy at target, deal damage
         // You'd need to implement enemy lookup and damage logic here
