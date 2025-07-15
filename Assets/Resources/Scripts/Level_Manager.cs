@@ -98,6 +98,8 @@ namespace LevelManager
         public Dictionary<(int, int), Thing> occupationInfo = new Dictionary<(int, int), Thing>();
         private GameObject cameraGameObject;
         private Camera levelCamera;
+        Color wallFillColour = Color.black;
+        public Color outlineColour = new Color(0.8f, 0.1f, 0.1f, 1f);
 
         public Level(int squaresX, int squaresY, (float, float) screenStart, (float, float) screenPercent, GameObject cameraGameObject)
         {
@@ -131,6 +133,8 @@ namespace LevelManager
                 {
                     foreach ((int, int) coord in item.Value)
                     {
+                        Landform lf = terrainInfo[coord];
+                        lf.colourSlot(outlineColour, wallFillColour);
                         terrainInfo[coord] = new Wall();
                     }
                 }

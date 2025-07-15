@@ -132,8 +132,9 @@ public class Level_Controller : MonoBehaviour
             // Designs the landforms.
             levelObject.designLandforms(new Color(0.8f, 0.1f, 0.1f, 1f), new Color(0.35f, 0.75f, 0.87f, 0.65f));
             levelObject.scaleLandforms((2f, 3f));
-            Landform lf = levelObject.terrainInfo[startingPosition];
-            
+            levelObject.modifyLandforms(new Dictionary<string, List<(int, int)>> {
+                { "wall", new List<(int, int)> { (4, 6), (1, 1) } }
+            });
             // Initialises and displays the monster spawner.
             List<int> bruteBasicStats = new List<int>() { 25, 1, 16, 1, 3 };
             MonsterSpawner testSpawner = new MonsterSpawner(SpriteLibrary.spawnerSprite, (4, 7), "brute", bruteBasicStats, levelObject, 100);
