@@ -4,6 +4,7 @@ using Sprites;
 using Unity.Mathematics;
 using System;
 using System.Linq;
+using Unity.VisualScripting;
 
 
 namespace LevelManager
@@ -13,6 +14,10 @@ namespace LevelManager
         public Sprite thingSprite;
         public (int, int) coordPos;
         public Level levelObject;
+    }
+    public interface IHasHealth // interface for getting health
+    {
+        int Health { get; set; } // read/write
     }
     public class Landform
     {
@@ -93,6 +98,8 @@ namespace LevelManager
         public Dictionary<(int, int), Thing> occupationInfo = new Dictionary<(int, int), Thing>();
         private GameObject cameraGameObject;
         private Camera levelCamera;
+        Color wallFillColour = Color.black;
+        public Color outlineColour = new Color(0.8f, 0.1f, 0.1f, 1f);
 
         public Level(int squaresX, int squaresY, (float, float) screenStart, (float, float) screenPercent, GameObject cameraGameObject)
         {
@@ -126,6 +133,8 @@ namespace LevelManager
                 {
                     foreach ((int, int) coord in item.Value)
                     {
+                        Landform lf = terrainInfo[coord];
+                        lf.colourSlot(outlineColour, wallFillColour);
                         terrainInfo[coord] = new Wall();
                     }
                 }
@@ -251,6 +260,26 @@ namespace LevelManager
                 .Where(kv => types.Any(t => t.IsInstanceOfType(kv.Value)))
                 .Select(kv => kv.Value)
                 .ToList();
+        }
+        public List<((int, int) position, Thing thing, int health)> returnStuffByType(params Type[] types) {
+            return occupationInfo
+                .Where(kv => types.Any(t => t.IsInstanceOfType(kv.Value)))
+                .Select(kv => (
+                    position: kv.Key,
+                    thing: kv.Value,
+                    health: GetHealthSafe(kv.Value)
+                ))
+                .ToList();
+        }
+
+        private int GetHealthSafe(Thing thing)
+        {
+            if (thing is IHasHealth hasHealth) // creating an interface to get health, alternative is to hard code but it will be messy
+            {
+                Debug.Log($"Health of {thing.GetType().Name} at {thing.coordPos}: {hasHealth.Health}");
+                return hasHealth.Health;
+            }
+            return 0; // Default value if health is not applicable
         }
     }
 }

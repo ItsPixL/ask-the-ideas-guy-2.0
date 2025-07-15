@@ -18,9 +18,9 @@ public class Character_Controller : MonoBehaviour
     public List<(int, int)> highlightedSlots = new List<(int, int)>();
     public int health = 60;
     public int xp = 0;
-    public List<int> xpRequirements = new List<int> { 100, 250, 500, 900, 1400 };
+    public List<int> xpRequirements = new List<int> { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
     public int currentLevel = 1;
-    private int playerTurns = 0; // used to give the player multiple turns before the monster turn. must keep in mind that the first moveCharacter is just placing the character down
+    public int playerTurns = 0; // used to give the player multiple turns before the monster turn. must keep in mind that the first moveCharacter is just placing the character down
     public int allowedTurns; // number of turns the player gets per phase
     public (int, int) getStartingPosition()
     {
@@ -71,33 +71,56 @@ public class Character_Controller : MonoBehaviour
     {
         ClearHighlights();
         highlightedSlots.Clear();
+
         if (GameStateManager.Instance.CurrentState != GameStateManager.GameState.InGame ||
             GameStateManager.Instance.CurrentInGameSubState != GameStateManager.InGameSubState.PlayerTurn)
         {
             Debug.LogWarning("Cannot highlight reachable grids when not in PlayerTurn state.");
             return;
         }
-        for (int dx = -maxTravelDistance; dx <= maxTravelDistance; dx++)
+
+        HashSet<(int, int)> visited = new();
+        Queue<((int, int) pos, int dist)> queue = new();
+
+        queue.Enqueue((currentPosition, 0));
+        visited.Add(currentPosition);
+
+        while (queue.Count > 0)
         {
-            for (int dy = -maxTravelDistance; dy <= maxTravelDistance; dy++)
+            var (pos, dist) = queue.Dequeue();
+            int x = pos.Item1;
+            int y = pos.Item2;
+
+            if (dist > 0)
             {
-                int nx = currentPosition.Item1 + dx;
-                int ny = currentPosition.Item2 + dy;
-                if ((nx, ny) == currentPosition) continue; // skip current position
-                if (Mathf.Abs(dx) + Mathf.Abs(dy) <= maxTravelDistance)
-                { // Manhattan distance
-                    if (levelObject.isInField((nx, ny)))
-                    {
-                        Landform lf = levelObject.terrainInfo[(nx, ny)];
-                        if (!lf.canTravelThrough) continue; // skip any landforms that the player can't travel through (e.g. walls)
-                        highlightedSlots.Add((nx, ny));
-                        Debug.Log($"Reachable slot: ({nx}, {ny})");
-                        lf.colourSlot(movableOutlineColour, movableFillColour);
-                    }
-                }
+                // Only highlight tiles that aren't the starting point
+                Landform lf = levelObject.terrainInfo[pos];
+                lf.colourSlot(movableOutlineColour, movableFillColour);
+                highlightedSlots.Add(pos);
+                Debug.Log($"Reachable slot: ({x}, {y})");
+            }
+
+            if (dist == maxTravelDistance)
+                continue; // stop if we've reached max range
+
+            // 4-directional movement: N, S, E, W
+            var directions = new (int, int)[] { (0, 1), (1, 0), (0, -1), (-1, 0) };
+
+            foreach (var (dx, dy) in directions)
+            {
+                var next = (x + dx, y + dy);
+                if (visited.Contains(next)) continue;
+                if (!levelObject.isInField(next)) continue;
+
+                Landform lf = levelObject.terrainInfo[next];
+                if (!lf.canTravelThrough) continue;
+
+                queue.Enqueue((next, dist + 1));
+                visited.Add(next);
             }
         }
     }
+
 
     // xp related stuff
     public void AddXP(int amount)
@@ -127,10 +150,10 @@ public class Character_Controller : MonoBehaviour
         }
     }
 
-    private void checkTurnCount()
+    public void checkTurnCount()
     {
-        Debug.Log($"Player turns used: {playerTurns}");
-        Debug.Log($"Allowed turns: {allowedTurns}");
+        // Debug.Log($"Player turns used: {playerTurns}");
+        // Debug.Log($"Allowed turns: {allowedTurns}");
         if (playerTurns >= allowedTurns)
         {
             GameStateManager.Instance.SetInGameSubState(GameStateManager.InGameSubState.MonsterTurn);

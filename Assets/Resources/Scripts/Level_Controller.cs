@@ -4,6 +4,7 @@ using MonsterManager;
 using Sprites;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using System.ComponentModel;
 
 public class Level_Controller : MonoBehaviour
 {
@@ -110,7 +111,6 @@ public class Level_Controller : MonoBehaviour
         playerMovement(selectedSlot, isReachable);
     }
 
-
     public void initLevelDetails() {
         // Defines general things true to all levels.
         GameStateManager.Instance.SetState(GameStateManager.GameState.InGame);
@@ -132,14 +132,23 @@ public class Level_Controller : MonoBehaviour
             // Designs the landforms.
             levelObject.designLandforms(new Color(0.8f, 0.1f, 0.1f, 1f), new Color(0.35f, 0.75f, 0.87f, 0.65f));
             levelObject.scaleLandforms((2f, 3f));
+            levelObject.modifyLandforms(new Dictionary<string, List<(int, int)>> {
+                { "wall", new List<(int, int)> { (4, 6), (1, 1) } }
+            });
             // Initialises and displays the monster spawner.
             List<int> bruteBasicStats = new List<int>() { 25, 1, 16, 1, 3 };
-            MonsterSpawner testSpawner = new MonsterSpawner(SpriteLibrary.spawnerSprite, (4, 7), "brute", bruteBasicStats, levelObject);
+            MonsterSpawner testSpawner = new MonsterSpawner(SpriteLibrary.spawnerSprite, (4, 7), "brute", bruteBasicStats, levelObject, 100);
             testSpawner.displaySpawner();
+            // Initialises and displays the weapons.
+            Sprite mySwordSprite = SpriteLibrary.swordSprite;
+            Sword sword = Weapon.SpawnWeapon<Sword>(new Vector3(-5, 0, 0), mySwordSprite);
+            Sprite myDaggerSprite = SpriteLibrary.daggerSprite;
+            Dagger dagger = Weapon.SpawnWeapon<Dagger>(new Vector3(-5, -2, 0), myDaggerSprite);
+            Sprite myBowAndArrow = SpriteLibrary.bowAndArrowSprite;
+            Bow_and_Arrow bowAndArrow = Weapon.SpawnWeapon<Bow_and_Arrow>(new Vector3(-5, 2, 0), myBowAndArrow);
             // Deploys the character.
             levelObject.characterController.moveCharacter(startingPosition);
-            levelObject.characterController.AddXP(100); // Adding some XP for testing
-
+            levelObject.characterController.AddXP(10); // Adding some XP for testing
         }
     }
 }
