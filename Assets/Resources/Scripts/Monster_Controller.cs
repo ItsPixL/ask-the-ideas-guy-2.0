@@ -45,8 +45,8 @@ public class Monster_Controller : MonoBehaviour
     
     private void checkTurnCount()
     {
-        Debug.Log($"Monster turns used: {monsterTurns}");
-        Debug.Log($"Allowed turns: {allowedTurns}");
+        // Debug.Log($"Monster turns used: {monsterTurns}");
+        // Debug.Log($"Allowed turns: {allowedTurns}");
         if (monsterTurns >= allowedTurns)
         {
             GameStateManager.Instance.SetInGameSubState(GameStateManager.InGameSubState.PlayerTurn);

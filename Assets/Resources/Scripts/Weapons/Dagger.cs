@@ -39,12 +39,12 @@ public class Dagger : Weapon {
         int px = position.Item1;
         int py = position.Item2;
 
-        var monsterData = levelObject.returnStuffByType(typeof(Monster)); // , typeof(MonsterSpawner) only add if monster spawners can be attacked
+        var monsterData = levelObject.returnStuffByType(typeof(Monster), typeof(MonsterSpawner));
 
         for (int i = 1; i <= range; i++) { // checking each tile in range
             var target = (px, py + i);
             foreach (var (pos, monster, health) in monsterData) {
-                Debug.Log($"Thing: {monster.GetType().Name} at ({pos.Item1}, {pos.Item2}) has {health} HP");
+                // Debug.Log($"Thing: {monster.GetType().Name} at ({pos.Item1}, {pos.Item2}) has {health} HP");
                 if (pos == target && monster is IHasHealth hasHealth) { // checking if monster is in the target position and has health
                     hasHealth.Health -= damage;
                     Debug.Log($"Dealt {damage} damage to {monster.GetType().Name} at ({pos.Item1}, {pos.Item2}). Remaining health: {hasHealth.Health}");
@@ -57,7 +57,6 @@ public class Dagger : Weapon {
             }
         }
 
-        Debug.Log($"Dagger used! Dealing {damage} damage to ({px}, {py})");
         player.checkTurnCount();
     }
 }

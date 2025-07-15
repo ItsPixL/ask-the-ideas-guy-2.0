@@ -39,7 +39,7 @@ public class Bow_and_Arrow : Weapon {
         int px = position.Item1;
         int py = position.Item2;
 
-        var monsterData = levelObject.returnStuffByType(typeof(Monster)); // , typeof(MonsterSpawner) only add if monster spawners can be attacked
+        var monsterData = levelObject.returnStuffByType(typeof(Monster), typeof(MonsterSpawner));
 
         for (int i = 1; i <= range; i++) { // checking each tile in range
             var target = (px, py + i);
@@ -57,7 +57,6 @@ public class Bow_and_Arrow : Weapon {
             }
         }
 
-        Debug.Log($"Bow and Arrow used! Dealing {damage} damage to ({px}, {py})");
         player.checkTurnCount();
     }
 }
