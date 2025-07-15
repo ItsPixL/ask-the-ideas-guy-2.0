@@ -5,6 +5,12 @@ public abstract class Weapon : MonoBehaviour {
     public string weaponName;
     public int damage;
     public Sprite weaponSprite;
+    // highlighting logic
+    private (int, int)? highlightedTile = null;
+    private Level highlightedLevel = null;
+    // normal colours
+    public Color outlineColour = new Color(0.8f, 0.1f, 0.1f, 1f);
+    public Color fillColour = new Color(0.35f, 0.75f, 0.87f, 0.65f);
 
     // Highlights the area of effect for this weapon
     public abstract void HighlightAOE((int, int) position, Level levelObject);
@@ -30,6 +36,7 @@ public abstract class Weapon : MonoBehaviour {
         // You need to use the player position and levelObject
         var player = FindFirstObjectByType<Character_Controller>();
         if (player != null && player.levelObject != null) {
+            ClearHighlight();
             Use(player.currentPosition, player.levelObject);
         }
     }
@@ -37,8 +44,28 @@ public abstract class Weapon : MonoBehaviour {
         if (Input.GetMouseButtonDown(1)) {
             var player = FindFirstObjectByType<Character_Controller>();
             if (player != null && player.levelObject != null) {
-                HighlightAOE(player.currentPosition, player.levelObject);
+                var target = (player.currentPosition.Item1, player.currentPosition.Item2 + 1); // Same tile as Sword logic
+
+                if (highlightedTile.HasValue && highlightedTile.Value == target) { // if it is already highlighted, unhighlight it
+                    ClearHighlight();
+                } else { // if it is not highlighted, highlight it
+                    ClearHighlight(); // in case something else was highlighted
+                    HighlightAOE(player.currentPosition, player.levelObject);
+                    highlightedTile = target;
+                    highlightedLevel = player.levelObject;
+                }
             }
         }
+    }
+    private void ClearHighlight() {
+        if (highlightedTile.HasValue && highlightedLevel != null) {
+            var tile = highlightedTile.Value;
+            if (highlightedLevel.isInField(tile)) {
+                Landform lf = highlightedLevel.terrainInfo[tile];
+                lf.colourSlot(outlineColour, fillColour); // Reset to normal (or use default)
+            }
+        }
+        highlightedTile = null;
+        highlightedLevel = null;
     }
 }
