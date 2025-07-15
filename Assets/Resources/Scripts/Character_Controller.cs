@@ -3,7 +3,8 @@ using UnityEngine;
 using Sprites;
 using LevelManager;
 
-public class Character_Controller : MonoBehaviour {
+public class Character_Controller : MonoBehaviour
+{
     public Landform landform;
     public Level levelObject;
     public (int, int) currentPosition = (0, 0);
@@ -20,23 +21,28 @@ public class Character_Controller : MonoBehaviour {
     public List<int> xpRequirements = new List<int> { 100, 250, 500, 900, 1400 };
     public int currentLevel = 1;
     private int playerTurns = 0; // used to give the player multiple turns before the monster turn. must keep in mind that the first moveCharacter is just placing the character down
-    public (int, int) getStartingPosition() {
+    public int allowedTurns; // number of turns the player gets per phase
+    public (int, int) getStartingPosition()
+    {
         // need to code this later
         startingPosition = (0, 0);
         currentPosition = startingPosition;
         Debug.Log($"Starting position set to: {startingPosition.Item1}, {startingPosition.Item2}");
         return startingPosition;
     }
-    public void moveCharacter((int, int) newPosition, float scaleX = 0.05f, float scaleY = 0.05f) {
-        playerTurns += 1;
+    public void moveCharacter((int, int) newPosition, float scaleX = 0.05f, float scaleY = 0.05f)
+    {
         if (GameStateManager.Instance.CurrentState != GameStateManager.GameState.InGame ||
-            GameStateManager.Instance.CurrentInGameSubState != GameStateManager.InGameSubState.PlayerTurn) {
+            GameStateManager.Instance.CurrentInGameSubState != GameStateManager.InGameSubState.PlayerTurn)
+        {
             Debug.LogWarning("Cannot highlight reachable grids when not in PlayerTurn state.");
             return;
         }
+        playerTurns += 1;
         // Destroy the old sprite if it exists
-        if (characterSpriteObj != null) {
-            GameObject.Destroy(characterSpriteObj);
+        if (characterSpriteObj != null)
+        {
+            Destroy(characterSpriteObj);
         }
         // moving the character visually
         characterSpriteObj = levelObject.PlaceSpriteInSlot(newPosition, SpriteLibrary.mainCharacterSprite, scaleX, scaleY);
@@ -44,15 +50,16 @@ public class Character_Controller : MonoBehaviour {
         landform = levelObject.terrainInfo[newPosition];
         // clear highlights after moving
         ClearHighlights();
-        if (playerTurns > 2) {
-            GameStateManager.Instance.SetInGameSubState(GameStateManager.InGameSubState.MonsterTurn);
-            playerTurns = 0;
-        }
+        // Checks if the player's used all of his turns.
+        checkTurnCount();
     }
-    
-    public void ClearHighlights() {
-        foreach (var slot in highlightedSlots) {
-            if (levelObject.hasSelectedSlot(slot)) {
+
+    public void ClearHighlights()
+    {
+        foreach (var slot in highlightedSlots)
+        {
+            if (levelObject.isInField(slot))
+            {
                 Landform lf = levelObject.terrainInfo[slot];
                 lf.colourSlot(outlineColour, fillColour);
             }
@@ -60,23 +67,29 @@ public class Character_Controller : MonoBehaviour {
         highlightedSlots.Clear();
     }
 
-    public void HighlightReachableGrids(int maxTravelDistance) {
+    public void HighlightReachableGrids(int maxTravelDistance)
+    {
         ClearHighlights();
         highlightedSlots.Clear();
         if (GameStateManager.Instance.CurrentState != GameStateManager.GameState.InGame ||
-            GameStateManager.Instance.CurrentInGameSubState != GameStateManager.InGameSubState.PlayerTurn) {
+            GameStateManager.Instance.CurrentInGameSubState != GameStateManager.InGameSubState.PlayerTurn)
+        {
             Debug.LogWarning("Cannot highlight reachable grids when not in PlayerTurn state.");
             return;
         }
-        for (int dx = -maxTravelDistance; dx <= maxTravelDistance; dx++) {
-            for (int dy = -maxTravelDistance; dy <= maxTravelDistance; dy++) {
+        for (int dx = -maxTravelDistance; dx <= maxTravelDistance; dx++)
+        {
+            for (int dy = -maxTravelDistance; dy <= maxTravelDistance; dy++)
+            {
                 int nx = currentPosition.Item1 + dx;
                 int ny = currentPosition.Item2 + dy;
                 if ((nx, ny) == currentPosition) continue; // skip current position
-                if (Mathf.Abs(dx) + Mathf.Abs(dy) <= maxTravelDistance) { // Manhattan distance
-                    if (levelObject.hasSelectedSlot((nx, ny))) {
+                if (Mathf.Abs(dx) + Mathf.Abs(dy) <= maxTravelDistance)
+                { // Manhattan distance
+                    if (levelObject.isInField((nx, ny)))
+                    {
                         Landform lf = levelObject.terrainInfo[(nx, ny)];
-                        if (lf.isWall) continue; // skip walls
+                        if (!lf.canTravelThrough) continue; // skip any landforms that the player can't travel through (e.g. walls)
                         highlightedSlots.Add((nx, ny));
                         Debug.Log($"Reachable slot: ({nx}, {ny})");
                         lf.colourSlot(movableOutlineColour, movableFillColour);
@@ -85,26 +98,43 @@ public class Character_Controller : MonoBehaviour {
             }
         }
     }
-    
+
     // xp related stuff
-    public void AddXP(int amount) {
+    public void AddXP(int amount)
+    {
         xp += amount;
         Debug.Log($"Added {amount} XP. Total XP: {xp}");
         CheckLevelUp();
     }
 
-    private void CheckLevelUp() {
+    private void CheckLevelUp()
+    {
         int requiredXP = xpRequirements[currentLevel - 1]; // the current level starts at 1
-        while (xp >= requiredXP) {
+        while (xp >= requiredXP)
+        {
             xp -= requiredXP; // reseting the XP to zero after leveling up
             currentLevel++;
             health += 10; // Will have to create a dictionary if the amount of health gained per level is different
-            if (currentLevel - 1 <= xpRequirements.Count) {
+            if (currentLevel - 1 <= xpRequirements.Count)
+            {
                 requiredXP = xpRequirements[currentLevel - 1];
-            } else {
+            }
+            else
+            {
                 Debug.Log("No more levels left");
             }
             Debug.Log($"Level up! New level: {currentLevel}, Health: {health}, XP for next level: {requiredXP}");
+        }
+    }
+
+    private void checkTurnCount()
+    {
+        Debug.Log($"Player turns used: {playerTurns}");
+        Debug.Log($"Allowed turns: {allowedTurns}");
+        if (playerTurns >= allowedTurns)
+        {
+            GameStateManager.Instance.SetInGameSubState(GameStateManager.InGameSubState.MonsterTurn);
+            playerTurns = 0;
         }
     }
 }

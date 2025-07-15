@@ -2,25 +2,29 @@ using System.Collections.Generic;
 using UnityEngine;
 using Sprites;
 using Unity.Mathematics;
-using Unity.VisualScripting;
+using System;
+using System.Linq;
+
 
 namespace LevelManager
 {
+    public abstract class Thing // A "thing" is just anything that can occupy a space on the board (e.g. monsters, items, placeable traps etc.)
+    {
+        public Sprite thingSprite;
+        public (int, int) coordPos;
+        public Level levelObject;
+    }
     public class Landform
     {
-        public bool isWall;
-        public Sprite spriteOnTop = null;
+        public bool isNormal = true; // This allows the landform class to also be an instance of a normal slot, not just an abstract class. 
+        public bool canTravelThrough = true;
+        public bool canSeePast = true;
         public GameObject slotOutline = null;
-        private SpriteRenderer outlineRenderer = null;
-        private GameObject slotFill = null;
-        private SpriteRenderer fillRenderer = null;
+        protected SpriteRenderer outlineRenderer = null;
+        protected GameObject slotFill = null;
+        protected SpriteRenderer fillRenderer = null;
 
-        public Landform(bool isWall)
-        {
-            this.isWall = isWall;
-        }
-
-        public void designSlot(Sprite sprite)
+        public virtual void designSlot(Sprite sprite)
         {
             slotOutline = new GameObject("Slot Outline");
             outlineRenderer = slotOutline.AddComponent<SpriteRenderer>();
@@ -54,6 +58,29 @@ namespace LevelManager
         }
     }
 
+    public class Wall : Landform
+    {
+        public Wall()
+        {
+            isNormal = false;
+            canTravelThrough = false;
+            canSeePast = false;
+        }
+
+        public override void designSlot(Sprite sprite)
+        {
+            slotOutline = new GameObject("Slot Outline");
+            outlineRenderer = slotOutline.AddComponent<SpriteRenderer>();
+            outlineRenderer.sprite = sprite;
+            outlineRenderer.sortingOrder = 1;
+            slotFill = new GameObject("Slot Fill");
+            slotFill.transform.parent = slotOutline.transform;
+            fillRenderer = slotFill.AddComponent<SpriteRenderer>();
+            fillRenderer.sprite = SpriteLibrary.wallSprite;
+            fillRenderer.sortingOrder = 2;
+        }
+    }
+
     public class Level
     {
         public Character_Controller characterController;
@@ -63,6 +90,7 @@ namespace LevelManager
         private (float, float) screenPercent;
         private (float, float) percentPerSlot;
         public Dictionary<(int, int), Landform> terrainInfo = new Dictionary<(int, int), Landform>();
+        public Dictionary<(int, int), Thing> occupationInfo = new Dictionary<(int, int), Thing>();
         private GameObject cameraGameObject;
         private Camera levelCamera;
 
@@ -85,7 +113,7 @@ namespace LevelManager
                 for (int j = 0; j < squaresY; j++)
                 {
                     (int, int) currCoord = (i, j);
-                    terrainInfo.Add(currCoord, new Landform(false));
+                    terrainInfo.Add(currCoord, new Landform());
                 }
             }
         }
@@ -98,7 +126,7 @@ namespace LevelManager
                 {
                     foreach ((int, int) coord in item.Value)
                     {
-                        terrainInfo[coord].isWall = true;
+                        terrainInfo[coord] = new Wall();
                     }
                 }
                 else if (landformType == "none")
@@ -112,8 +140,10 @@ namespace LevelManager
             }
         }
 
-        public void designLandforms(Color outlineColour, Color fillColour) {
-            foreach (var item in terrainInfo) {
+        public void designLandforms(Color outlineColour, Color fillColour)
+        {
+            foreach (var item in terrainInfo)
+            {
                 Landform currLandform = item.Value;
                 currLandform.designSlot(SpriteLibrary.squareSprite);
                 currLandform.colourSlot(outlineColour, fillColour);
@@ -150,7 +180,7 @@ namespace LevelManager
             return (slotCoordX, slotCoordY);
         }
 
-        public bool hasSelectedSlot((int, int) selectedSlot)
+        public bool isInField((int, int) selectedSlot)
         {
             if (selectedSlot.Item1 < 0 || selectedSlot.Item2 >= squaresX)
             {
@@ -167,8 +197,10 @@ namespace LevelManager
             return true;
         }
 
-        public GameObject PlaceSpriteInSlot((int, int) gridCoord, Sprite sprite, float scaleX = 0.5f, float scaleY = 0.8f) {
-            if (!terrainInfo.TryGetValue(gridCoord, out Landform landform)) {
+        public GameObject PlaceSpriteInSlot((int, int) gridCoord, Sprite sprite, float scaleX = 0.5f, float scaleY = 0.8f)
+        {
+            if (!terrainInfo.TryGetValue(gridCoord, out Landform landform))
+            {
                 Debug.LogWarning($"No landform found at grid coordinate {gridCoord}. Cannot place sprite.");
                 return null;
             }
@@ -196,15 +228,29 @@ namespace LevelManager
             SpriteRenderer renderer = spriteObj.AddComponent<SpriteRenderer>();
             renderer.sprite = sprite;
             renderer.sortingOrder = 3; // making sure that the sprite is on top of the grids
-            
+
             // scaling the sprite to fit the slot
             spriteObj.transform.localScale = new Vector3(slotSize.Item1 * scaleX, slotSize.Item2 * scaleY, 1);
 
             // making sure that the sprite moves/scales with the slot if it the slot is resized (mainly used for the preview where the monster spawners are visible)
             spriteObj.transform.parent = landform.slotOutline.transform;
             spriteObj.transform.localPosition = Vector3.zero;
-            
+
             return spriteObj;
+        }
+
+        public bool isOccupied((int, int) gridCoord)
+        {
+            return occupationInfo.ContainsKey(gridCoord) || (characterController.currentPosition == gridCoord);
+        }
+
+        // Use this to return all monsters, monster spawners, items etc. on the grid.
+        public List<Thing> returnThingsByType(params Type[] types)
+        {
+            return occupationInfo
+                .Where(kv => types.Any(t => t.IsInstanceOfType(kv.Value)))
+                .Select(kv => kv.Value)
+                .ToList();
         }
     }
 }
