@@ -16,8 +16,17 @@ public class Dagger : Weapon {
 
         for (int i = 1; i <= range; i++) {
             var target = (nx, ny + i);
+
+            // Checking if tile is valid (in bounds and not a wall)
+            if (!levelObject.isInField(target)) break;
+
+            Landform lf = levelObject.terrainInfo[target];
+            if (!lf.canTravelThrough) { // if the tile cannot be seen through, skip it
+                Debug.Log($"Cannot attack through {lf.GetType().Name} at ({target.Item1}, {target.Item2})");
+                break;  // Stop checking further tiles
+            }
+            
             if (levelObject.isInField(target)) {
-                Landform lf = levelObject.terrainInfo[target];
                 lf.colourSlot(Color.red, new Color(1f, 0.5f, 0.5f, 0.5f));
 
                 // Add to base class tracking
@@ -43,6 +52,16 @@ public class Dagger : Weapon {
 
         for (int i = 1; i <= range; i++) { // checking each tile in range
             var target = (px, py + i);
+
+            // Checking if tile is valid (in bounds and not a wall)
+            if (!levelObject.isInField(target)) break;
+
+            Landform lf = levelObject.terrainInfo[target];
+            if (!lf.canTravelThrough) { // if the tile cannot be seen through, skip it
+                Debug.Log($"Cannot attack through {lf.GetType().Name} at ({target.Item1}, {target.Item2})");
+                break;  // Stop checking further tiles
+            }
+            
             foreach (var (pos, monster, health) in monsterData) {
                 // Debug.Log($"Thing: {monster.GetType().Name} at ({pos.Item1}, {pos.Item2}) has {health} HP");
                 if (pos == target && monster is IHasHealth hasHealth) { // checking if monster is in the target position and has health
