@@ -18,7 +18,7 @@ public class Character_Controller : MonoBehaviour
     public List<(int, int)> highlightedSlots = new List<(int, int)>();
     public int health = 60;
     public int xp = 0;
-    public List<int> xpRequirements = new List<int> { 100, 250, 500, 900, 1400 };
+    public List<int> xpRequirements = new List<int> { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
     public int currentLevel = 1;
     public int playerTurns = 0; // used to give the player multiple turns before the monster turn. must keep in mind that the first moveCharacter is just placing the character down
     public int allowedTurns; // number of turns the player gets per phase

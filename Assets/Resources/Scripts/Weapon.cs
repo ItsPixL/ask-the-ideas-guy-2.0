@@ -21,7 +21,7 @@ public abstract class Weapon : MonoBehaviour {
     public abstract void Use((int, int) position, Level levelObject);
 
     // Spawns a weapon GameObject with the given sprite at the specified position
-    public static T SpawnWeapon<T>(Vector3 worldPosition, Sprite sprite) where T : Weapon { // making it generic so that it can be used for any weapon type
+    public static T SpawnWeapon<T>(Vector3 worldPosition, Sprite sprite, float scaleX = 0.5f, float scaleY = 0.5f) where T : Weapon { // making it generic so that it can be used for any weapon type
         GameObject weaponGO = new GameObject(typeof(T).Name); // creating the gameobject
         T weapon = weaponGO.AddComponent<T>(); // adding the weapon script
         weapon.weaponSprite = sprite; // assigning the sprite to the weapon
@@ -30,6 +30,8 @@ public abstract class Weapon : MonoBehaviour {
         sr.sprite = sprite; // setting the sprite image
 
         weaponGO.AddComponent<BoxCollider2D>(); // adding a collider for mouse interaction
+
+        weaponGO.transform.localScale = new Vector3(scaleX, scaleY, 1f); // scaling the weapons
 
         weaponGO.transform.position = worldPosition; // placing the gameobject in the world
         return weapon;

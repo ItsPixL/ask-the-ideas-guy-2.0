@@ -144,7 +144,7 @@ public class Level_Controller : MonoBehaviour
             Bow_and_Arrow bowAndArrow = Weapon.SpawnWeapon<Bow_and_Arrow>(new Vector3(-5, 2, 0), myBowAndArrow);
             // Deploys the character.
             levelObject.characterController.moveCharacter(startingPosition);
-            levelObject.characterController.AddXP(100); // Adding some XP for testing
+            levelObject.characterController.AddXP(10); // Adding some XP for testing
         }
     }
 }
