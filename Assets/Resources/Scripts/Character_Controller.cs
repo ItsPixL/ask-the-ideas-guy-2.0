@@ -127,7 +127,7 @@ public class Character_Controller : MonoBehaviour
         }
     }
 
-    private void checkTurnCount()
+    public void checkTurnCount()
     {
         Debug.Log($"Player turns used: {playerTurns}");
         Debug.Log($"Allowed turns: {allowedTurns}");
