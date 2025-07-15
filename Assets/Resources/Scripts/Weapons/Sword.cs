@@ -48,10 +48,7 @@ public class Sword : Weapon {
                 return; // Exit after applying damage
             }
         }
-
-
-        // Example: If there's an enemy at target, deal damage
-        // You'd need to implement enemy lookup and damage logic here
+        
         Debug.Log($"Sword used! Dealing {damage} damage to ({nx}, {ny})");
         player.checkTurnCount();
     }

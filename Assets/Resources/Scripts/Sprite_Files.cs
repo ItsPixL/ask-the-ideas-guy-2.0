@@ -11,6 +11,7 @@ namespace Sprites
         public static Sprite bruteSprite = Resources.Load<Sprite>("Sprites/Triangle"); // To be changed
         public static Sprite mainCharacterSprite = Resources.Load<Sprite>("Sprites/Main Character (before the volcano)");
         public static Sprite swordSprite = Resources.Load<Sprite>("Sprites/swordSprite"); // The weapon will not be displayed in the grids, but in the canvas
+        public static Sprite daggerSprite = Resources.Load<Sprite>("Sprites/daggerSprite"); // The weapon will not be displayed in the grids, but in the canvas
         public static Sprite spawnerSprite = Resources.Load<Sprite>("Sprites/Circle"); // To be changed
     }
 }

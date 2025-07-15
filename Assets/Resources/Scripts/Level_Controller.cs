@@ -139,6 +139,8 @@ public class Level_Controller : MonoBehaviour
             // Initialises and displays the weapons.
             Sprite mySwordSprite = SpriteLibrary.swordSprite;
             Sword sword = Weapon.SpawnWeapon<Sword>(new Vector3(-5, 0, 0), mySwordSprite);
+            Sprite myDaggerSprite = SpriteLibrary.daggerSprite;
+            Dagger dagger = Weapon.SpawnWeapon<Dagger>(new Vector3(-5, -2, 0), myDaggerSprite);
             // Deploys the character.
             levelObject.characterController.moveCharacter(startingPosition);
             levelObject.characterController.AddXP(100); // Adding some XP for testing
